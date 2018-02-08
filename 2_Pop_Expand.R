@@ -1,5 +1,5 @@
 ###############################################################################
-#                                                                      Aug 2017
+#                                                                      Feb 2018
 #
 #   Population Level Bioenergetics Model of RBT @ Lees Ferry
 #
@@ -12,7 +12,7 @@
 #  To do:
 #  * Get the physical data input until 6/10/2016 (Yard)
 ###############################################################################
-load("C:/Users/mdodrill/Desktop/RBT_BioE/From_Korman/Interp.RData")
+load("Interp.RData")
 
 #-----------------------------------------------------------------------------#
 # do some formatting of the data Josh sent
@@ -151,4 +151,4 @@ all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm * 1000) / (GCLengthm * GCWid
 # write.table(MidWgt, file = "RBT_BioE_Josh_Midwgt_11_15_17.csv", sep = ",", row.names = F)
 # write.table(N, file = "RBT_BioE_Josh_N_11_15_17.csv", sep = ",", row.names = F)
 
-
+#-----------------------------------------------------------------------------#

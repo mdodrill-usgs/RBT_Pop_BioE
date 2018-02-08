@@ -13,7 +13,7 @@
 library(ggplot2)
 library(ggthemes)
 
-windows(xpos = 25, record = T)
+windows(xpos = 25, record = T, width = 9*2, height = 5*2)
 
 #-----------------------------------------------------------------------------#
 # add the size groups to the data

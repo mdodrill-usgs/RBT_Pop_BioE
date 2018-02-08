@@ -10,6 +10,15 @@
 #  
 ###############################################################################
 
+#-----------------------------------------------------------------------------#
+# get the directory from where the script lives (not using Rstudio to 'source',
+# or when you use source in a script)
+str.dir = getSrcDirectory(function(x) {x})
+
+data.dir = paste0(str.dir, "/Data_In")
+setwd(data.dir)
+
+#-----------------------------------------------------------------------------#
 # See Yards spreadsheet for validation the metabolizer
 # (Macro_TemperatureDependentMetabolism_2017_07_11_1132)
 
@@ -25,7 +34,7 @@
 
 metabolizer = function(sec, Temp, W, with.plants = FALSE){
   
-  tot.s = 60*60*24
+  tot.s = 60 * 60 * 24
   
   pDL = sec / tot.s  # = this is the day length in seconds (input file)
   # pDL = prop.s   # = this is the day length in seconds (input file)
@@ -164,3 +173,4 @@ metabolizer = function(sec, Temp, W, with.plants = FALSE){
 # W = 86.47728289
 # 
 # out = metabolizer(prop.s, Temp, W)
+#-----------------------------------------------------------------------------#

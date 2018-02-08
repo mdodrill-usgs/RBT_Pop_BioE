@@ -5,19 +5,21 @@
 #
 #  Notes:
 #  * Made a function for the metabolic calc. and added this to BioE_Functions_V1
+#  * Need to change the directory for sourcing the 'BioE_Functions_V1.R', but
+#    this will find the correct directory for the data.
+#  * This script will do the per capita metabolic calcs. 
 #
 #  To do:
 #  * 
 #  
 ###############################################################################
-setwd('C:/Users/mdodrill/Desktop/RBT_BioE/Data/')
 rm(list = ls(all = TRUE))
 
 library(reshape2)
 library(dplyr)
 
 # load functions stored in R.script
-source("C:/Users/mdodrill/Desktop/RBT_BioE/Code/BioE_Functions_V1.R", chdir = F)
+source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
 
 day.in = read.table(file = "Input_File_Date_DL_T.csv", header = T, sep = ",")
 
@@ -29,16 +31,13 @@ w.in = read.table(file = "Input_File_Date_MidSz_Weight.csv", header = T, sep = "
 w.in.2 = w.in[,which(!is.na(colSums(w.in)))]
 
 # change the col names to the date (not the funky format which is imported)
-#----------> can't have dates as the column name
-# names(w.in.2)[2:ncol(w.in.2)] = as.Date(substr(names(w.in.2)[2:ncol(w.in.2)], 2,
-#                                                nchar(names(w.in.2)[2:ncol(w.in.2)])),
-#                                         format = "%m.%d.%Y")
+#----------> can't have dates as the column name, so go with character
 
-# do some formatting to the fish mass data
 names(w.in.2)[2:ncol(w.in.2)] = as.character(as.Date(substr(names(w.in.2)[2:ncol(w.in.2)], 2,
                                                             nchar(names(w.in.2)[2:ncol(w.in.2)])),
                                                      format = "%m.%d.%Y"))
 
+# do some formatting to the fish mass data
 w.in.3 = melt(w.in.2, id.vars = c("MidSz"))
 names(w.in.3)[2:3] = c("Date", "fish.mass")
 
