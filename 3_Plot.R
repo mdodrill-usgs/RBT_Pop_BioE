@@ -5,10 +5,12 @@
 #
 #  Notes:
 #  * This script plots a bunch of model variables
+#  * Run "1_Calc_Metabolism.R" first, then run, '2_Pop_Expand.R', then this script
 #
 #  To do:
-#  * Finish plots for all of the variables
 #  * Write a wrapper function for running the plots?
+#  * Build a MarkDown doc?
+#
 ###############################################################################
 library(ggplot2)
 library(ggthemes)
@@ -33,13 +35,13 @@ all2$sz.group = factor(sz.key[match(tmp, sz.key[,1]),2], ordered = T, levels = s
 # Daily abundance by size class
 
 N.all = group_by(all2, Date, sz.group) %>%
-              summarize(N.tot = sum(N))
+  summarize(N.tot = sum(N))
 
-
-p = ggplot(N.all, aes(x = Date, y = N.tot)) +
-    geom_bar(position = "stack", stat = "identity",
-             aes(color = rev(sz.group), fill = rev(sz.group)))
-p
+p.1 = ggplot(N.all, aes(x = Date, y = N.tot)) +
+      geom_bar(position = "stack", stat = "identity",
+             aes(color = rev(sz.group), fill = rev(sz.group))) + 
+      theme_base()
+p.1
 
 #-----------------------------------------------------------------------------#
 # Mean daily growth by size class
@@ -47,39 +49,13 @@ p
 G.town = group_by(all2, Date, sz.group) %>%
   summarize(G.mean = mean(Growth))
 
-
-p = ggplot(G.town, aes(x = Date, y = G.mean)) +
+p.2 = ggplot(G.town, aes(x = Date, y = G.mean)) +
   geom_line(aes(color = sz.group), size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
-
-# p2 = p + theme_solarized(light = F)
-# p2
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  theme_base()
 
 
-#-----------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------#
-# Mean daily growth by size class
-# library(gganimate)
-# library(magick)
-# 
-# 
-# G.town = group_by(all2, Date, sz.group) %>%
-#   summarize(G.mean = mean(Growth))
-# 
-# G.town$year = substr(G.town$Date,1,4)
-# 
-# 
-# p = ggplot(G.town, aes(x = Date, y = G.mean, frame = year)) +
-#   geom_line(aes(color = sz.group, cumulative = TRUE), size = 1) +
-#   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-# p
-# 
-# p2 = p + theme_solarized(light = F)
-# p2
-# gganimate(p2, interval = 2, filname = "output.gif", ani.width = 1000, ani.height = 600)
-# 
-# 
+p.2
 
 #-----------------------------------------------------------------------------#
 # Mean daily Cmin by size class
@@ -87,14 +63,11 @@ p
 c.min = group_by(all2, Date, sz.group) %>%
         summarize(mean.c.min = mean(Cmin.kJ))
 
-
-p = ggplot(c.min, aes(x = Date, y = mean.c.min)) +
+p.3 = ggplot(c.min, aes(x = Date, y = mean.c.min)) +
     geom_line(aes(color = sz.group), size = 1) +
-    scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
-
-# p2 = p + theme_solarized_2(light = F)
-# p2
+    scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+    theme_base()
+p.3
 
 #-----------------------------------------------------------------------------#
 # Total daily Cmin (all fish)
@@ -102,11 +75,11 @@ p
 c.min.tot = group_by(all2, Date) %>%
   summarize(tot.c.min = sum(Cmin.kJ))
 
-
-p = ggplot(c.min.tot, aes(x = Date, y = tot.c.min)) +
+p.4 = ggplot(c.min.tot, aes(x = Date, y = tot.c.min)) +
   geom_line(size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  theme_base()
+p.4
 
 #-----------------------------------------------------------------------------#
 # Total daily Cmin - Inverts (all fish)
@@ -114,11 +87,11 @@ p
 c.min.inv = group_by(all2, Date) %>%
   summarize(tot.c.min.inv = sum(Cmin.Inv))
 
-
-p = ggplot(c.min.inv, aes(x = Date, y = tot.c.min.inv)) +
+p.5 = ggplot(c.min.inv, aes(x = Date, y = tot.c.min.inv)) +
   geom_line(size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  theme_base()
+p.5
 
 #-----------------------------------------------------------------------------#
 # Total daily Cmin - Plants (all fish)
@@ -127,16 +100,14 @@ c.min.pla = group_by(all2, Date) %>%
   summarize(tot.c.min.pla = sum(Cmin.Pla))
 
 
-p = ggplot(c.min.pla, aes(x = Date, y = tot.c.min.pla)) +
+p.6 = ggplot(c.min.pla, aes(x = Date, y = tot.c.min.pla)) +
   geom_line(size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  theme_base()
+p.6
 
 #-----------------------------------------------------------------------------#
 # Toal daily Cmin - Both Inverts & Plants
-
-# Note the units are different between the tot and pla/inv
-# c.min.2 = plyr::join_all(list(c.min.tot, c.min.pla, c.min.inv), by = "Date", type = "full")
 
 c.min.pla$type = rep("Plants")
 names(c.min.pla)[2] = "c.min" 
@@ -145,15 +116,20 @@ c.min.inv$type = rep("Inverts")
 names(c.min.inv)[2] = "c.min" 
 c.min.2 = rbind(c.min.pla, c.min.inv)
 
-
-p = ggplot(c.min.2, aes(x = Date, y = c.min)) +
+p.7 = ggplot(c.min.2, aes(x = Date, y = c.min)) +
   geom_line(aes(color = type), size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  theme_base()
+p.7
 
 #-----------------------------------------------------------------------------#
-# F
+# Fu.p
 
+#-----------------------------------------------------------------------------#
+# Fu.i
+
+#-----------------------------------------------------------------------------#
+# Fu.tot
 
 #-----------------------------------------------------------------------------#
 # PopDadelGMJ is the amount of daily growth converted to units of energy (MJ)
@@ -162,24 +138,25 @@ p
 pop.1 = group_by(all2, Date) %>%
   summarize(tot.PopDadelGMJ = sum(PopDadelGMJ))
 
-p = ggplot(pop.1, aes(x = Date, y = tot.PopDadelGMJ)) +
+p.10 = ggplot(pop.1, aes(x = Date, y = tot.PopDadelGMJ)) +
   geom_line(size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
   labs(title = "PopDadelGMJ is the amount of daily growth converted to units of energy (MJ) consumed",
-       y = "PopDadelGMJ")
-p + theme_base()
+       y = "PopDadelGMJ") + 
+  theme_base()
+p.10 
 
 
 pop.1.b = group_by(all2, Date, sz.group) %>%
   summarize(tot.PopDadelGMJ = sum(PopDadelGMJ))
 
-p = ggplot(pop.1.b, aes(x = Date, y = tot.PopDadelGMJ)) +
+p.11 = ggplot(pop.1.b, aes(x = Date, y = tot.PopDadelGMJ)) +
   geom_line(aes(color = sz.group), size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
   labs(title = "PopDadelGMJ is the amount of daily growth converted to units of energy (MJ) consumed",
-       y = "PopDadelGMJ")
-p + theme_base()
-
+       y = "PopDadelGMJ") + 
+  theme_base()
+p.11 
 
 #-----------------------------------------------------------------------------#
 # PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from
@@ -190,24 +167,25 @@ p + theme_base()
 pop.2 = group_by(all2, Date) %>%
   summarize(tot.PopDadelGInvMJ = sum(PopDadelGInvMJ))
 
-p = ggplot(pop.2, aes(x = Date, y = tot.PopDadelGInvMJ)) +
+p.12 = ggplot(pop.2, aes(x = Date, y = tot.PopDadelGInvMJ)) +
   geom_line(size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
   labs(title = "PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from invertebrates \n consumed at a population level (N of size-bin). Energy units are MJ",
-       y = "PopDadelGInvMJ")
-p + theme_base()
+       y = "PopDadelGInvMJ") + 
+  theme_base()
+p.12
 
 
 pop.2.b = group_by(all2, Date, sz.group) %>%
   summarize(tot.PopDadelGInvMJ = sum(PopDadelGInvMJ))
 
-p = ggplot(pop.2.b, aes(x = Date, y = tot.PopDadelGInvMJ)) +
+p.13 = ggplot(pop.2.b, aes(x = Date, y = tot.PopDadelGInvMJ)) +
   geom_line(aes(color = sz.group), size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
   labs(title = "PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from invertebrates \n consumed at a population level (N of size-bin). Energy units are MJ",
-       y = "PopDadelGInvMJ")
-p + theme_base()
-
+       y = "PopDadelGInvMJ") + 
+  theme_base()
+p.13 
 
 #-----------------------------------------------------------------------------#
 # PopDadelGPlaMJ is the amount of daily energy ascribed to growth derived from
@@ -217,20 +195,25 @@ p + theme_base()
 pop.3 = group_by(all2, Date) %>%
   summarize(tot.PopDadelGPlaMJ = sum(PopDadelGPlaMJ))
 
-p = ggplot(pop.3, aes(x = Date, y = tot.PopDadelGPlaMJ)) +
+p.14 = ggplot(pop.3, aes(x = Date, y = tot.PopDadelGPlaMJ)) +
   geom_line(size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDadelGPlaMJ is the amount of daily energy ascribed to growth derived from plant matter \n consumed at a population level (N of size-bin). Energy units are MJ",
+       y = "PopDadelGPlaMJ") + 
+  theme_base()
+p.14
 
 
 pop.3.b = group_by(all2, Date, sz.group) %>%
   summarize(tot.PopDadelGPlaMJ = sum(PopDadelGPlaMJ))
 
-p = ggplot(pop.3.b, aes(x = Date, y = tot.PopDadelGPlaMJ)) +
+p.15 = ggplot(pop.3.b, aes(x = Date, y = tot.PopDadelGPlaMJ)) +
   geom_line(aes(color = sz.group), size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y")
-p
-
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDadelGPlaMJ is the amount of daily energy ascribed to growth derived from plant matter \n consumed at a population level (N of size-bin). Energy units are MJ",
+       y = "PopDadelGPlaMJ") + 
+  theme_base()
+p.15
 
 #-----------------------------------------------------------------------------#
 # PopDaCMinInv_MJ expands Cmin (energy consumed for maintenance levels based on
@@ -241,51 +224,131 @@ p
 pop.4 = group_by(all2, Date) %>%
   summarize(tot.PopDaCMinInvMJ = sum(PopDaCMinInvMJ))
 
-p = ggplot(pop.4, aes(x = Date, y = tot.PopDaCMinInvMJ)) +
+p.16 = ggplot(pop.4, aes(x = Date, y = tot.PopDaCMinInvMJ)) +
   geom_line(size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
   labs(title = "PopDaCMinInv_MJ expands Cmin (energy consumed for maintenance levels based on the \n consumption of invertebrates) from an individual level that is scaled up
         to a population level (N of size-bin) and converted from KJ to MJ. Units are \n MJ consumed in Lees Ferry da-1.",
-       y = "PopDaCMinInv_MJ")
-p + theme_base()
+       y = "PopDaCMinInv_MJ") + 
+  theme_base()
+p.16 
 
 
 pop.4.b = group_by(all2, Date, sz.group) %>%
   summarize(tot.PopDaCMinInvMJ = sum(PopDaCMinInvMJ))
 
-p = ggplot(pop.4.b, aes(x = Date, y = tot.PopDaCMinInvMJ)) +
+p.17 = ggplot(pop.4.b, aes(x = Date, y = tot.PopDaCMinInvMJ)) +
   geom_line(aes(color = sz.group), size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
   labs(title = "PopDaCMinInv_MJ expands Cmin (energy consumed for maintenance levels based on the \n consumption of invertebrates) from an individual level that is scaled up
         to a population level (N of size-bin) and converted from KJ to MJ. Units are \n MJ consumed in Lees Ferry da-1.",
-       y = "PopDaCMinInv_MJ")
-p + theme_base()
+       y = "PopDaCMinInv_MJ") + 
+  theme_base()
+p.17 
 
 
-pop.4.c = group_by(all2, Date, MidSz) %>%
-  summarize(tot.PopDaCMinInvMJ = sum(PopDaCMinInvMJ))
-pop.4.c$MidSz = as.factor(pop.4.c$MidSz)
+# by individual mid size
+all2$MidSz.2 = as.factor(all2$MidSz) 
 
-
-all2$MidSz.2 = as.factor(all2$MidSz)
-p = ggplot(all2, aes(x = Date, y = PopDaCMinInvMJ)) +
+p.17.b = ggplot(all2, aes(x = Date, y = PopDaCMinInvMJ)) +
   geom_line(aes(color = MidSz.2), size = 1) +
-  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
-  facet_wrap(~ sz.group)
-p
+  scale_x_date(date_breaks = "6 month", date_labels = "%b %Y") +
+  facet_wrap(~ sz.group) + 
+  theme_base() + theme(axis.text.x = element_text(angle = -45, vjust = .5))
 
+p.17.b
 
-
+#--------------------------------------
+# playing around with ridgeline plots
+# library(ggridges)
+# library(gridExtra)
+# 
+# p.list = list()
+# 
+# for(i in 1:6){
+#   sub = all2[which(as.character(all2$sz.group) == sz.key[i,2]),]
+# 
+#   sub$Date2 = as.numeric(sub$Date)
+#   sub$MidSz.3 = as.factor(as.numeric(sub$MidSz.2))
+# 
+#   p.17.c = ggplot(sub, aes(x = Date2, y = MidSz.3, height = PopDaCMinInvMJ, group = MidSz.3)) +
+#     geom_density_ridges(stat = "identity", scale = 2, aes(fill = MidSz.3), alpha = .5) +
+#     # geom_density_ridges(stat = "identity", scale = 1, aes(fill = sz.group), alpha = 1) +
+#     labs(y = "", x = "", title = "")# +
+#   # facet_wrap(~ sz.group)
+#   # p.17.c + theme_base() + theme(axis.text = element_blank())
+# 
+#   p.list[[i]] = p.17.c + theme_base() + theme(axis.text = element_blank())
+# }
+# 
+# 
+# grid.arrange(p.list[[1]], p.list[[2]], p.list[[3]], p.list[[4]], p.list[[5]], p.list[[6]], nrow = 2)
 #-----------------------------------------------------------------------------#
 # PopDaCMinPlaMJ expands Cmin (energy consumed for maintenance levels based on
 # the consumption of plant matter) from an individual level that is scaled up to
 # a population level (N of size-bin) and converted from KJ to MJ. Units are MJ
 # consumed in Lees Ferry da-1.
 
+pop.5 = group_by(all2, Date) %>%
+  summarize(tot.PopDaCMinPlaMJ = sum(PopDaCMinPlaMJ))
+
+p.18 = ggplot(pop.5, aes(x = Date, y = tot.PopDaCMinPlaMJ)) +
+  geom_line(size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDaCMinPlaMJ expands Cmin (energy consumed for maintenance levels based on
+ the consumption of plant matter) from an individual level that is scaled up to
+ a population level (N of size-bin) and converted from KJ to MJ. Units are MJ
+ consumed in Lees Ferry da-1.",
+       y = "PopDaCMinPlaMJ") + 
+  theme_base()
+p.18
+
+
+pop.5.b = group_by(all2, Date, sz.group) %>%
+  summarize(tot.PopDaCMinPlaMJ = sum(PopDaCMinPlaMJ))
+
+p.19 = ggplot(pop.5.b, aes(x = Date, y = tot.PopDaCMinPlaMJ)) +
+  geom_line(aes(color = sz.group), size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDaCMinPlaMJ expands Cmin (energy consumed for maintenance levels based on
+ the consumption of plant matter) from an individual level that is scaled up to
+ a population level (N of size-bin) and converted from KJ to MJ. Units are MJ
+ consumed in Lees Ferry da-1.",
+       y = "PopDaCMinPlaMJ") + 
+  theme_base()
+p.19 
+
 #-----------------------------------------------------------------------------#
 # PopDaCTotInvMJ  is the total amount of daily energy consumed at a population
 # level (N of size-bin) that is derived from solely from invertebrates. Units
 # are MJ consumed in Lees Ferry da-1.
+
+pop.6 = group_by(all2, Date) %>%
+  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+
+p.18 = ggplot(pop.6, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
+  geom_line(size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDaCTotInvMJ  is the total amount of daily energy consumed at a population
+  level (N of size-bin) that is derived from solely from invertebrates. Units
+  are MJ consumed in Lees Ferry da-1.",
+       y = "PopDaCTotInvMJ") + 
+  theme_base()
+p.18
+
+
+pop.6.b = group_by(all2, Date, sz.group) %>%
+  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+
+p.19 = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
+  geom_line(aes(color = sz.group), size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
+  labs(title = "PopDaCTotInvMJ  is the total amount of daily energy consumed at a population
+  level (N of size-bin) that is derived from solely from invertebrates. Units
+  are MJ consumed in Lees Ferry da-1.",
+       y = "PopDaCTotInvMJ") + 
+  theme_base()
+p.19 
 
 #-----------------------------------------------------------------------------#
 # PopDaCTotInvKgafdm is the total amount of daily invertebrate biomass consumed
@@ -295,41 +358,64 @@ p
 pop.7 = group_by(all2, Date) %>%
   summarize(tot.PopDaCTotInvKgafdm = sum(PopDaCTotInvKgafdm))
 
-p = ggplot(pop.7, aes(x = Date, y = tot.PopDaCTotInvKgafdm)) +
+p.20 = ggplot(pop.7, aes(x = Date, y = tot.PopDaCTotInvKgafdm)) +
   geom_line(size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
   labs(title = "PopDaCTotInvKgafdm is the total amount of daily invertebrate biomass consumed \n at a population level (N of size-bin). Biomass units are Kg AFDM in Lees Ferry da-1.",
-       y = "PopDaCTotInvKgafdm")
+       y = "PopDaCTotInvKgafdm") + theme_base()
 
-
-p + theme_base()
-
+p.20 
 
 pop.7.b = group_by(all2, Date, sz.group) %>%
   summarize(tot.PopDaCTotInvKgafdm = sum(PopDaCTotInvKgafdm))
 
-p = ggplot(pop.7.b, aes(x = Date, y = tot.PopDaCTotInvKgafdm)) +
-  # geom_line(size = 1) +
+p.21 = ggplot(pop.7.b, aes(x = Date, y = tot.PopDaCTotInvKgafdm)) +
   geom_line(aes(color = sz.group), size = 1) +
   scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
   labs(title = "PopDaCTotInvKgafdm is the total amount of daily invertebrate biomass consumed \n at a population level (N of size-bin). Biomass units are Kg AFDM in Lees Ferry da-1.",
-       y = "PopDaCTotInvKgafdm")
+       y = "PopDaCTotInvKgafdm") + theme_base()
 
+p.21 
 
-p + theme_base()
-
-
+#--------------------------------------
+# # playing around with ridgeline plots
+# library(ggridges)
+# 
+# pop.7.b$Date2 = as.numeric(pop.7.b$Date)
+# pop.7.b$gp = as.factor(as.numeric(pop.7.b$sz.group))
+# 
+# p.21.b = ggplot(pop.7.b, aes(x = Date2, y = gp, height = tot.PopDaCTotInvKgafdm, group = gp)) +
+#   geom_density_ridges(stat = "identity", scale = 2, aes(fill = sz.group), alpha = .5) +
+#   # geom_density_ridges(stat = "identity", scale = 1, aes(fill = sz.group), alpha = 1) +
+#   labs(y = "", x = "", title = "")
+# p.21.b + theme_base() + theme(axis.text = element_blank())
 
 
 #-----------------------------------------------------------------------------#
 # PopDaCTotInvgafdmm2 is the average amount of daily invertebrate biomass
 # consumed per m^2 . Biomass units are g AFDM m-2 da-1 in Lees Ferry
 
+pop.8 = group_by(all2, Date) %>%
+  summarize(tot.PopDaCTotInvgafdmm2 = sum(PopDaCTotInvgafdmm2))
 
+p.20 = ggplot(pop.8, aes(x = Date, y = tot.PopDaCTotInvgafdmm2)) +
+  geom_line(size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  labs(title = "PopDaCTotInvgafdmm2 is the average amount of daily invertebrate biomass
+  consumed per m^2 . Biomass units are g AFDM m-2 da-1 in Lees Ferry",
+       y = "PopDaCTotInvgafdmm2") + theme_base()
 
+p.20 
 
+pop.8.b = group_by(all2, Date, sz.group) %>%
+  summarize(tot.PopDaCTotInvgafdmm2 = sum(PopDaCTotInvgafdmm2))
 
+p.21 = ggplot(pop.8.b, aes(x = Date, y = tot.PopDaCTotInvgafdmm2)) +
+  geom_line(aes(color = sz.group), size = 1) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") + 
+  labs(title = "PopDaCTotInvgafdmm2 is the average amount of daily invertebrate biomass
+  consumed per m^2 . Biomass units are g AFDM m-2 da-1 in Lees Ferry",
+       y = "PopDaCTotInvgafdmm2") + theme_base()
 
-
-
-
+p.21 
+#-----------------------------------------------------------------------------#
