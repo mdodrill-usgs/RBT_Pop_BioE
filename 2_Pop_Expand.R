@@ -10,7 +10,7 @@
 #  * Run "1_Calc_Metabolism.R" first, then this script
 #
 #  To do:
-#  * Get the physical data input until 6/10/2016 (Yard)
+#  * 
 ###############################################################################
 load("Interp.RData")
 
@@ -65,7 +65,7 @@ GCWidthm = 123.83 # meters
 
 # PopDadelGMJ = IndDadelGgww * DaN * gtoKg * KgwwtoMJ
 
-all2$PopDadelGMJ = all2$Growth * all2$N * .001 * KgwwtoMJ                             # is the convert to KG done above in KgwwtoMJ?
+all2$PopDadelGMJ = all2$Growth * all2$N * .001 * KgwwtoMJ                            
 
 #---------------------
 # PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from
@@ -76,7 +76,7 @@ all2$PopDadelGMJ = all2$Growth * all2$N * .001 * KgwwtoMJ                       
 # PopDadelGInvMJ = PopDadelGMJ * (pDi) / (Ai) 
 # Ai = 0.783      # Assimilation efficiency of invertebrates
 
-all2$PopDadelGInvMJ = all2$PopDadelGMJ * all2$pDi / 0.783                             # should the Ai be * instead of /
+all2$PopDadelGInvMJ = all2$PopDadelGMJ * all2$pDi / 0.783                            
 
 #---------------------
 # PopDadelGPlaMJ is the amount of daily energy ascribed to growth derived from
@@ -87,7 +87,7 @@ all2$PopDadelGInvMJ = all2$PopDadelGMJ * all2$pDi / 0.783                       
 # PopDadelGPlaMJ = PopDadelGMJ * (pDp) / (Ap) 
 # Ap = 0.11       # assimilation efficiency of plants 
 
-all2$PopDadelGPlaMJ = all2$PopDadelGMJ * (1 - all2$pDi) / 0.11                       # same Q as above? 
+all2$PopDadelGPlaMJ = all2$PopDadelGMJ * (1 - all2$pDi) / 0.11                       
 
 #---------------------
 # PopDaCMinInv_MJ expands Cmin (energy consumed for maintenance levels based on
@@ -97,7 +97,7 @@ all2$PopDadelGPlaMJ = all2$PopDadelGMJ * (1 - all2$pDi) / 0.11                  
 
 # PopDaCMinInvMJ = IndCMinInv * DaN * KJtoMJ
 
-all2$PopDaCMinInvMJ = all2$Cmin.Inv * 0.001 * all2$N * 0.001                   # are the units correct?
+all2$PopDaCMinInvMJ = all2$Cmin.Inv * 0.001 * all2$N * 0.001                  
 
 #---------------------
 # PopDaCMinPlaMJ expands Cmin (energy consumed for maintenance levels based on
@@ -107,7 +107,7 @@ all2$PopDaCMinInvMJ = all2$Cmin.Inv * 0.001 * all2$N * 0.001                   #
 
 # PopDaCMinPlaMJ = IndivCMinPlant * DaN * KJtoMJ
 
-all2$PopDaCMinPlaMJ = all2$Cmin.Pla * 0.001 * all2$N * 0.001                  # are the units correct?
+all2$PopDaCMinPlaMJ = all2$Cmin.Pla * 0.001 * all2$N * 0.001                  
 
 #---------------------
 # PopDaCTotInvMJ  is the total amount of daily energy consumed at a population
