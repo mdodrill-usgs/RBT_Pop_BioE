@@ -1,7 +1,7 @@
 ###############################################################################
 #                                                                      Feb 2018
 #
-#   Population Level Bioenergetics Model of RBT @ Lees Ferry
+#          Population Level Bioenergetics Model of RBT @ Lees Ferry
 #
 #  Notes:
 #  * Made a function for the metabolic calc. and added this to BioE_Functions_V1
@@ -47,7 +47,7 @@ dat.in.all = left_join(w.in.3, day.in, by = c("Date"))
 
 #-----------------------------------------------------------------------------#
 # Below this runs the function 'metabolizer' for all the input data
-# Set the argement with.plants to TRUE or FALSE
+# Set the argument with.plants to TRUE or FALSE
 
 base_mat = dat.in.all
 
