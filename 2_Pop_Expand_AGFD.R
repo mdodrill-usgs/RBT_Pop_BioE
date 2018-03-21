@@ -145,5 +145,7 @@ all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm * 1000) / (GCLengthm * GCWid
 # write.table(Growth, file = "RBT_BioE_Josh_Growth_11_15_17.csv", sep = ",", row.names = F)
 # write.table(MidWgt, file = "RBT_BioE_Josh_Midwgt_11_15_17.csv", sep = ",", row.names = F)
 # write.table(N, file = "RBT_BioE_Josh_N_11_15_17.csv", sep = ",", row.names = F)
+# write.table(all2, file = "RBT_BioE_Output_03_01_18_AGF_LF_1991_to_2016.csv", sep = ",", row.names = F)
+# write.table(all2, file = "RBT_BioE_Output_03_01_18_AGF_LF_1991_to_2016_DD_NOtoAGF.csv", sep = ",", row.names = F)
 
 #-----------------------------------------------------------------------------#
