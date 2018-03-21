@@ -21,7 +21,9 @@ library(dplyr)
 # load functions stored in R.script
 source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
 
-day.in = read.table(file = "Pgrow and CF for AGF LF 1991 to 2014.csv", header = T, sep = ",")
+# day.in = read.table(file = "Pgrow and CF for AGF LF 1991 to 2014.csv", header = T, sep = ",")
+# day.in = read.table(file = "Pgrow and CF for AGF LF 1991 to 2016.csv", header = T, sep = ",")
+day.in = read.table(file = "Pgrow and CF for AGF LF 1991 to 2016 DD NOtoAGF.csv", header = T, sep = ",")
 
 day.in$Date = as.Date(day.in$Date, format = "%m/%d/%Y")
 
