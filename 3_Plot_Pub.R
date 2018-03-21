@@ -36,10 +36,6 @@ all2$sz.group = factor(sz.key[match(tmp, sz.key[,1]),2], ordered = T, levels = s
 # (combination of bar histogram and line graph). (Color)
 
 
-# HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!HELP !!!
-
-
-
 
 N.all = group_by(all2, Date, sz.group) %>%
   summarize(N.tot = sum(N))
@@ -47,58 +43,74 @@ N.all = group_by(all2, Date, sz.group) %>%
 all2$Pop.Mass.g = all2$N * all2$fish.mass
 
 
-
-
-p.1 = ggplot(N.all, aes(x = Date, y = N.tot)) +
-  # geom_bar(position = "stack",
+p.1 = ggplot(N.all, aes(x = Date, y = N.tot/100000)) +
   geom_bar(position = position_stack(reverse = TRUE),
            stat = "identity",
            # aes(color = rev(sz.group), fill = rev(sz.group))) +
            aes(color = sz.group, fill = sz.group)) +
-  # geom_line(data = all2, aes(x = Date, y = Pop.Mass.g)) +
+  labs(y = "Abundance (100,000's)", x = "", color = "Size Class", fill = "Size Class") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b") + #,
+               # limits = as.Date(c('2012-01-01','2017-01-01'))) +
   theme_base()
 # p.1
 
-g.1 = p.1 + theme()
+p1 = p.1 + theme(legend.position = c(.8,.8))
 
-# mass.all = group_by(all2, Date, sz.group) %>%
-#   summarise(mass.tot = sum(Pop.Mass.g))
-# 
-# 
-# p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot)) +
-#       geom_bar(position = position_stack(reverse = TRUE),
-#                stat = "identity",
-#                aes(color = sz.group, fill = sz.group)) +
-#   theme_base()
-# p.2
-# 
-# 
-# grid.arrange(p.1, p.2)
+p1
 
-
-
-
+#--------------------------------------
 mass.all = group_by(all2, Date) %>%
   summarise(mass.tot = sum(Pop.Mass.g))
 
 
-p.3 = ggplot(mass.all, aes(x = Date, y = mass.tot)) +
-      geom_line() + theme_base()
-p.3
+p2 = ggplot(mass.all, aes(x = Date, y = mass.tot/1000/1000)) +
+  geom_line(size = 1) + 
+  labs(y = "Biomass (1,000's Kg ww)") +
+  scale_x_date(date_breaks = "year", date_labels = "%Y") +
+               # limits = as.Date(c('2012-01-01','2017-01-01'))) +
+  theme_base()
 
-grid.arrange(p.1, p.3)
+
+# p2 = p2 + theme(axis.text.y = element_text(hjust = 1))
+
+p2 = p2 + theme(axis.text.y = element_text(hjust = 1),
+                axis.text.x = element_text(margin = margin(t = 30, r = 0, b = 0, l = 0)),
+                axis.ticks = element_blank())
 
 
-# sub = N.all[which(N.all$Date == N.all$Date[1]),]
-# sub.2 = mass.all[which(mass.all$Date == mass.all$Date[1]),]
-# 
-# 
-# p.1 = ggplot(sub, aes(x = Date, y = N.tot)) +
-#   geom_bar(position = "stack", stat = "identity",
-#   # geom_bar(position = "dodge", stat = "identity",
-#            aes(color = sz.group, fill = sz.group)) + 
-#   theme_base()
-# p.1
+p2
+#--------------------------------------
+
+
+# source function 'ggplot_dual_axis_2' from 'Working_Second_Axis.R'
+
+ggplot_dual_axis_2(p1, p2)
+
+
+ggplot_dual_axis_3(p1, p2)
+
+
+
+
+#--------------------------------------
+mass.all = group_by(all2, Date) %>%
+  summarise(mass.tot = sum(Pop.Mass.g))
+
+
+p2 = ggplot(all2, aes(x = Date, y = Pop.Mass.g)) +
+  geom_line(size = 1, aes(color = as.factor(MidSz))) + 
+  labs(y = "Biomass") +
+  facet_wrap(~sz.group, scales = "free") +
+  theme_base()
+
+
+p2 = p2 + theme(axis.text.y = element_text(hjust = -1))
+
+p2
+#--------------------------------------
+
+
+
 
 #-----------------------------------------------------------------------------#
 # Fig 3 - Fig. 3. Panel (A & B), Line graphs (individual-daily not expanded to a
