@@ -496,6 +496,8 @@ G1 + theme(legend.position = c(.2,.9))
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
+# plot comparing the Cmin, del_G, and total consumption of inverts in units of
+# Kg afdm
 
 
 pop.pop = group_by(all2, Date) %>%
@@ -505,19 +507,19 @@ pop.pop = group_by(all2, Date) %>%
 
 dat.in = melt(pop.pop, id.vars = c("Date"))
 
+dat.in$date.2 = substr(dat.in$Date, 3, 4)
+
 G1 = ggplot(dat.in, aes(x = Date, y = value)) +
   geom_line(aes(color = variable), size = 1) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-  labs(y = "Population Level Daily Consumption in Kg AFDM of Inverts") + 
+  geom_text(aes(x = Date, y = value, label = date.2)) +  
+  scale_x_date(date_breaks = "1 year", date_labels = "%y") +
+  labs(y = "Population Level Daily Consumption in Kg AFDM of Inverts", 
+       title = "DD NotoAGF") + 
   theme_base()
 
 
 G1 + theme(legend.position = c(.2,.9))
 
 
-
-
-
-
-
-
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
