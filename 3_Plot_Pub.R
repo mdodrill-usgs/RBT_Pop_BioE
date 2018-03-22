@@ -12,9 +12,12 @@
 ###############################################################################
 library(ggplot2)
 library(ggthemes)
-library(gridExtra)
+# library(gridExtra)
+library(gtable)
+library(grid)
 
-windows(xpos = 25, record = T, width = 9*2, height = 5*2)
+
+windows(xpos = 25, record = T, width = 9 * 2, height = 5 * 2)
 
 #-----------------------------------------------------------------------------#
 # add the size groups to the data
@@ -49,7 +52,7 @@ p.1 = ggplot(N.all, aes(x = Date, y = N.tot/100000)) +
            # aes(color = rev(sz.group), fill = rev(sz.group))) +
            aes(color = sz.group, fill = sz.group)) +
   labs(y = "Abundance (100,000's)", x = "", color = "Size Class", fill = "Size Class") +
-  scale_x_date(date_breaks = "3 months", date_labels = "%b") + #,
+  scale_x_date(date_breaks = "3 months", date_labels = "%b \n %Y") + #,
                # limits = as.Date(c('2012-01-01','2017-01-01'))) +
   theme_base()
 # p.1
@@ -63,19 +66,23 @@ mass.all = group_by(all2, Date) %>%
   summarise(mass.tot = sum(Pop.Mass.g))
 
 
-p2 = ggplot(mass.all, aes(x = Date, y = mass.tot/1000/1000)) +
+# p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot/1000/1000)) +
+p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot * (1e-6))) +
   geom_line(size = 1) + 
-  labs(y = "Biomass (1,000's Kg ww)") +
-  scale_x_date(date_breaks = "year", date_labels = "%Y") +
+  labs(y = "Biomass (metric ton ww)") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
                # limits = as.Date(c('2012-01-01','2017-01-01'))) +
   theme_base()
 
 
+p2 = p.2 
 # p2 = p2 + theme(axis.text.y = element_text(hjust = 1))
 
-p2 = p2 + theme(axis.text.y = element_text(hjust = 1),
-                axis.text.x = element_text(margin = margin(t = 30, r = 0, b = 0, l = 0)),
-                axis.ticks = element_blank())
+# p2 = p.2 + theme(axis.text.y = element_text(hjust = 1),
+#                 axis.text.x = element_text(margin = margin(t = 30, r = 0, b = 0, l = 0)),
+#                 # axis.ticks.x = element_line(colour = "white"))
+#                 axis.ticks.x = element_line(colour = "red"))
+                
 
 
 p2
@@ -87,7 +94,7 @@ p2
 ggplot_dual_axis_2(p1, p2)
 
 
-ggplot_dual_axis_3(p1, p2)
+# ggplot_dual_axis_3(p1, p2)
 
 
 

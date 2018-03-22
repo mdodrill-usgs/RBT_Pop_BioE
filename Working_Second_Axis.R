@@ -187,6 +187,8 @@
 # ggplot_dual_axis(p1,p2,which.axis = "y")
 
 #-----------------------------------------------------------------------------#
+# using element_blank in any theme will blow this up :(
+
 ggplot_dual_axis_2 = function(plot1, plot2) {
   
   # Update plot with transparent panel
@@ -222,7 +224,10 @@ ggplot_dual_axis_2 = function(plot1, plot2) {
   ax$grobs = rev(ax$grobs)
   
   # ax$grobs[[1]]$x = ax$grobs[[1]]$x - unit(1, "npc") + unit(0.15, "cm")
+  # ax$grobs[[1]]$x = ax$grobs[[1]]$x - unit(1, "npc") + unit(0.3, "cm")
   ax$grobs[[1]]$x = ax$grobs[[1]]$x - unit(1, "npc") + unit(0.3, "cm")
+  
+  # ax$grobs[[1]]$x <- ax$grobs[[1]]$x - unit(1, "npc") + unit(0.15, "cm")
   
   # Add new row or column for axis label
     
@@ -249,10 +254,11 @@ ggplot_dual_axis_2 = function(plot1, plot2) {
 
 
 #-----------------------------------------------------------------------------#
-# ggplot_dual_axis_3 = function(plot1, plot2) {
+# using element_blank in any theme will blow this up :(
+ggplot_dual_axis_3 = function(plot1, plot2) {
 
-plot1 = p1
-plot2 = p2
+# plot1 = p1
+# plot2 = p2
   
   # Update plot with transparent panel
   plot2 = plot2 + theme(panel.background = element_rect(fill = NA))
@@ -351,7 +357,7 @@ plot2 = p2
 #       # g = gtable_add_grob(g, g2$grob[[7]], pp$t, length(g$widths), pp$b - 1)
   grid.draw(g)
   
-# }
+}
 
 
 
