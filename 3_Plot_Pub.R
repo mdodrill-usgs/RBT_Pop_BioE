@@ -149,27 +149,44 @@ p2
 # population level); Panel A: depicts size stratified daily growth (MJ/da),
 # Panel B: depicts size stratified daily basal metabolism (Cmin, MJ). (Color)
 
+#--------------------------------------
+# In energy units
 
-dat$DadelGMJ = dat$Growth  * .001 * KgwwtoMJ 
-
-# DadelGInvMJ = DadelGMJ * all2$pDi[1] / 0.783     # ask Yard if he wants this converted to inverts
-
-
-dat$Cmin.MJ = dat$Cmin.kJ * .001  # convert kilo Joules to mega Joules
-
+# dat$DadelGMJ = dat$Growth  * .001 * KgwwtoMJ 
+# 
+# # DadelGInvMJ = DadelGMJ * all2$pDi[1] / 0.783     
+# 
+# 
+# dat$Cmin.MJ = dat$Cmin.kJ * .001  # convert kilo Joules to mega Joules
+# 
+# G.town = group_by(dat, Date, sz.group) %>%
+#   summarize(G.mean = mean(DadelGMJ),
+#             Cmin.mean = mean(Cmin.MJ))
+# 
+# p.3.a = ggplot(G.town, aes(x = Date, y = G.mean)) +
+#         geom_line(aes(color = sz.group), size = 1) +
+#         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+#         labs(x = "", y = "Individual Mean Daily \n Growth Rates (MJ)",
+#              color = "Size Class") +
+#         yard_theme +
+#         theme(legend.position = c(.5, 1),
+#               axis.text.x = element_blank(),
+#               plot.margin = unit(c(1,1,0,1), "lines"),
+#               axis.line = element_line(color = 'black'),
+#               panel.border = element_blank(),
+#               panel.grid.major = element_line(colour = "gray90")) + 
+#         guides(colour = guide_legend(nrow = 1, title.position = "left"))   
+# # p.3.a
 #--------------------------------------
 
-# ask Yard --> does he want the mean for the size group? (what's below)
-
-
 G.town = group_by(dat, Date, sz.group) %>%
-  summarize(G.mean = mean(DadelGMJ),
+  summarize(G.mean = mean(Growth),
             Cmin.mean = mean(Cmin.MJ))
 
 p.3.a = ggplot(G.town, aes(x = Date, y = G.mean)) +
         geom_line(aes(color = sz.group), size = 1) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
-        labs(x = "", y = "Individual Mean Daily \n Growth Rates (MJ)",
+        labs(x = "", y = "Individual Mean Daily \n Growth Rates (g)",
              color = "Size Class") +
         yard_theme +
         theme(legend.position = c(.5, 1),
@@ -177,8 +194,8 @@ p.3.a = ggplot(G.town, aes(x = Date, y = G.mean)) +
               plot.margin = unit(c(1,1,0,1), "lines"),
               axis.line = element_line(color = 'black'),
               panel.border = element_blank(),
-              panel.grid.major = element_line(colour = "gray90")) + 
-        guides(colour = guide_legend(nrow = 1, title.position = "left"))   
+              panel.grid.major = element_line(colour = "gray90")) +
+        guides(colour = guide_legend(nrow = 1, title.position = "left"))
 # p.3.a
 
 
