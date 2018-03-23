@@ -12,7 +12,7 @@
 ###############################################################################
 library(ggplot2)
 library(ggthemes)
-# library(gridExtra)
+library(gridExtra)
 library(gtable)
 library(grid)
 
@@ -32,6 +32,31 @@ sz.key = data.frame(sz = c(1:6),
 tmp = findInterval(all2$MidSz, sz.groups)
 
 all2$sz.group = factor(sz.key[match(tmp, sz.key[,1]),2], ordered = T, levels = sz.key[,2])
+
+#-----------------------------------------------------------------------------#
+# Make a theme to use
+
+yard_theme = theme(axis.title.x = element_text(size = 14, vjust = -.1),
+                   axis.title.y = element_text(size = 14, vjust = 1),
+                   axis.text.x = element_text(size = 12, colour = "black"),
+                   axis.text.y = element_text(size = 12, colour = "black"),
+                   panel.background = element_rect(fill = "white"),
+                   panel.grid.minor = element_line(colour = "white"),
+                   panel.grid.major = element_line(colour = "white"),
+                   panel.border = element_rect(colour = "black", fill = NA),
+                   # strip.background = element_rect(fill = "white"),
+                   # strip.background = element_blank(),
+                   # strip.text = element_text(size = 14, vjust = 1),
+                   legend.text = element_text(size = 12),
+                   legend.title = element_text(size = 12),
+                   legend.title.align = .5,
+                   legend.key = element_rect(fill = "white"))
+
+
+
+
+
+
 
 #-----------------------------------------------------------------------------#
 # Fig 2 - Fig. 2. 2 -axis’s, Size stratified population estimate (50 mmm FL
@@ -69,7 +94,7 @@ mass.all = group_by(all2, Date) %>%
 # p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot/1000/1000)) +
 p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot * (1e-6))) +
   geom_line(size = 1) + 
-  labs(y = "Biomass (metric ton ww)") +
+  labs(y = "Biomass (metric tons ww)") +
   scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
                # limits = as.Date(c('2012-01-01','2017-01-01'))) +
   theme_base()
@@ -125,35 +150,149 @@ p2
 # Panel B: depicts size stratified daily basal metabolism (Cmin, MJ). (Color)
 
 
+dat$DadelGMJ = dat$Growth  * .001 * KgwwtoMJ 
+
+# DadelGInvMJ = DadelGMJ * all2$pDi[1] / 0.783     # ask Yard if he wants this converted to inverts
+
+
+dat$Cmin.MJ = dat$Cmin.kJ * .001  # convert kilo Joules to mega Joules
+
+#--------------------------------------
+
 # ask Yard --> does he want the mean for the size group? (what's below)
 
 
-G.town = group_by(all2, Date, sz.group) %>%
-  summarize(G.mean = mean(Growth),
-            Cmin.mean = mean(Cmin.Inv))
+G.town = group_by(dat, Date, sz.group) %>%
+  summarize(G.mean = mean(DadelGMJ),
+            Cmin.mean = mean(Cmin.MJ))
 
 p.3.a = ggplot(G.town, aes(x = Date, y = G.mean)) +
         geom_line(aes(color = sz.group), size = 1) +
-        scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
-        theme_base()
-
-p.3.a
+        scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+        labs(x = "", y = "Individual Mean Daily \n Growth Rates (MJ)",
+             color = "Size Class") +
+        yard_theme +
+        theme(legend.position = c(.5, 1),
+              axis.text.x = element_blank(),
+              plot.margin = unit(c(1,1,0,1), "lines"),
+              axis.line = element_line(color = 'black'),
+              panel.border = element_blank(),
+              panel.grid.major = element_line(colour = "gray90")) + 
+        guides(colour = guide_legend(nrow = 1, title.position = "left"))   
+# p.3.a
 
 
 p.3.b = ggplot(G.town, aes(x = Date, y = Cmin.mean)) +
         geom_line(aes(color = sz.group), size = 1) +
-        scale_x_date(date_breaks = "3 month", date_labels = "%b %Y") +
-        theme_base()
+        scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+        labs(x = "", y = "Individual Mean Daily \n Minimum Consumption (MJ)",
+             color = "Size Class") +
+        yard_theme +
+        theme(legend.position = "none",
+              plot.margin = unit(c(0,1,1,1), "lines"),
+              axis.line = element_line(color = 'black'),
+              panel.border = element_blank(),
+              panel.grid.major = element_line(colour = "gray90")) #+ 
+        # guides(colour = guide_legend(nrow = 1, title.position = "left"))
 
-p.3.b
+# p.3.b
 
 
-grid.arrange(p.3.a, p.3.b)
+G1 <- arrangeGrob(p.3.a,
+                  top = textGrob("A", x = unit(.95, "npc"),
+                                 y = unit(.95, "npc"),
+                                 just = c("left", "top"),
+                                 gp = gpar(col = "black", fontsize = 18)))
+
+G2 <- arrangeGrob(p.3.b,
+                  top = textGrob("B", x = unit(.95, "npc"),
+                                 y = unit(.95, "npc"),
+                                 just = c("left", "top"),
+                                 gp = gpar(col = "black", fontsize = 18)))
+
+
+
+# grid.arrange(p.3.a, p.3.b)
+grid.arrange(G1, G2)
 
 #-----------------------------------------------------------------------------#
+# Fig. 4. Single axis, Total daily consumption (at a population level)
+# stratified by size (50 mmm FL bins). (Color)
+
+# Add temperature panel
+library(RColorBrewer)
+
+pop.6.b = group_by(dat, Date, sz.group) %>%
+  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+
+
+u.date = unique(dat$Date)
+
+temps = dat[which(!duplicated(dat$Date)), c("Date", "T")]
+
+
+f.4.a = ggplot(temps, aes(x = Date, y = T)) +
+        geom_line(size  = 1, aes(color = T)) +
+        scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+        # scale_color_gradientn(colours = rev(brewer.pal(3, "Spectral"))) 
+        # scale_color_gradient(low = "blue", high = "red")
+        scale_colour_gradient2(low = "blue", mid = "yellow",
+                               high = "red", midpoint = 11, space = "Lab") +
+        labs(x = "", y = expression("Mean Daily Temperature "*~degree*C),
+             color = "Size Class") +
+        yard_theme +
+        theme(legend.position = "none",    
+              plot.margin = unit(c(0,1,1,1), "lines"),
+              axis.line = element_line(color = 'black'),
+              panel.border = element_blank(),
+              panel.grid.major = element_line(colour = "gray90")) 
+f.4.a
+
+  
+
+f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
+        geom_line(aes(color = sz.group), size = 1) +
+        scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+        labs(x = "", y = "Population Total Daily Consumption (MJ)",
+             color = "Size Class") +
+        yard_theme +
+        theme(legend.position = c(.5, 1),   
+              plot.margin = unit(c(0,1,1,1), "lines"),
+              axis.line = element_line(color = 'black'),
+              panel.border = element_blank(),
+              panel.grid.major = element_line(colour = "gray90")) +
+        guides(colour = guide_legend(nrow = 1, title.position = "left"))   
+f.4.b
+
+
+G1.4 <- arrangeGrob(f.4.a,
+                  top = textGrob("A", x = unit(.95, "npc"),
+                                 y = unit(.95, "npc"),
+                                 just = c("left", "top"),
+                                 gp = gpar(col = "black", fontsize = 18)))
+
+G2.4 <- arrangeGrob(f.4.b,
+                  top = textGrob("B", x = unit(.95, "npc"),
+                                 y = unit(.95, "npc"),
+                                 just = c("left", "top"),
+                                 gp = gpar(col = "black", fontsize = 18)))
 
 
 
+# grid.arrange(p.3.a, p.3.b)
+grid.arrange(G1.4, G2.4)
+
+
+#-----------------------------------------------------------------------------#
+#Fig. 5. 2 -axis’s, Total drift estimates (3 taxa) (trip dates) and annual diet
+#composition showing bar histogram for gammarids, chironomids, and simuliids
+#(combination of bar histogram and line graph). This figure will likely be
+#tricky (Black/white)
+
+
+
+#-----------------------------------------------------------------------------#
+#
 
 
 
