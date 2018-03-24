@@ -15,41 +15,54 @@
 
 pop_expand = function(base_mat, dat.in.all){
   
-  load("Interp.RData")
-  
-  #-----------------------------------------------------------------------------#
-  # do some formatting of the data Josh sent
-  my.N = tbl_df(as.data.frame(N))
-  dates = seq.Date(from = as.Date("2012/4/1"), to = as.Date("2012/4/1") + Ndays - 1, by = "day")
-  
-  colnames(my.N) = as.character(dates)
-  my.N$MidSz = MidLen + 3    # Yard and Korman call the size bins different things 
-  
-  my.N.2 = melt(my.N, id.vars = c("MidSz"))
-  names(my.N.2)[2:3] = c("Date", "N")
-  
-  
-  my.Growth = tbl_df(as.data.frame(Growth))
-  dates = seq.Date(from = as.Date("2012/4/1"), to = as.Date("2012/4/1") + Ndays - 1, by = "day")
-  
-  colnames(my.Growth) = as.character(dates)
-  my.Growth$MidSz = MidLen + 3    # Yard and Korman call the size bins different things 
-  
-  my.G.2 = melt(my.Growth, id.vars = c("MidSz"))
-  names(my.G.2)[2:3] = c("Date", "Growth")
-  
-  N.G = left_join(my.N.2, my.G.2, by = c("MidSz", "Date"))
-  N.G$Date = as.Date(N.G$Date, format = "%Y-%m-%d")
-  
-  #-----------------------------------------------------------------------------#
-  # Match up the base matabolism estimates with the N & Growth data for each sz bin and date
-  
-  all = left_join(N.G, base_mat, by = c("MidSz", "Date"))
-  
-  # since the input sizes don't match, cut down the data to only what matches
-  # between the input from Yard and that from Korman (N & G)
-  all2 = all[which(!is.na(all$DL)),]
-  
+  if(attributes(dat.in.all)$project == "NO"){
+    load("Interp.RData")
+    
+    #-----------------------------------------------------------------------------#
+    # do some formatting of the data Josh sent
+    my.N = tbl_df(as.data.frame(N))
+    dates = seq.Date(from = as.Date("2012/4/1"), to = as.Date("2012/4/1") + Ndays - 1, by = "day")
+    
+    colnames(my.N) = as.character(dates)
+    my.N$MidSz = MidLen + 3    # Yard and Korman call the size bins different things 
+    
+    my.N.2 = melt(my.N, id.vars = c("MidSz"))
+    names(my.N.2)[2:3] = c("Date", "N")
+    
+    
+    my.Growth = tbl_df(as.data.frame(Growth))
+    dates = seq.Date(from = as.Date("2012/4/1"), to = as.Date("2012/4/1") + Ndays - 1, by = "day")
+    
+    colnames(my.Growth) = as.character(dates)
+    my.Growth$MidSz = MidLen + 3    # Yard and Korman call the size bins different things 
+    
+    my.G.2 = melt(my.Growth, id.vars = c("MidSz"))
+    names(my.G.2)[2:3] = c("Date", "Growth")
+    
+    N.G = left_join(my.N.2, my.G.2, by = c("MidSz", "Date"))
+    N.G$Date = as.Date(N.G$Date, format = "%Y-%m-%d")
+    
+    #-----------------------------------------------------------------------------#
+    # Match up the base matabolism estimates with the N & Growth data for each sz bin and date
+    
+    all = left_join(N.G, base_mat, by = c("MidSz", "Date"))
+    
+    # since the input sizes don't match, cut down the data to only what matches
+    # between the input from Yard and that from Korman (N & G)
+    all2 = all[which(!is.na(all$DL)),]  
+    
+  } else {
+    
+    if(attributes(dat.in.all)$project == "monitoring"){
+      # Organize the base matabolism estimates (so this matches the col. order in
+      # '2_Pop_Expand.r')
+      
+      all2 = cbind(base_mat[,c(1:2)],
+                   N = dat.in.all$N,
+                   Growth = base_mat$Growth,
+                   base_mat[,c(3:12)])
+    }
+  }
   
   #-----------------------------------------------------------------------------#
   # Conversions & Constants
@@ -144,7 +157,27 @@ pop_expand = function(base_mat, dat.in.all){
   # all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm / GCLengthm * GCWidthm) * 1000    # BAD !
   
   all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm * 1000) / (GCLengthm * GCWidthm)  # GOOD
+  #---------------------
+  # (MD added this one)
+  # Calculation converts Total MJ in Lees Ferry reach per day to Kg 
   
+  # PopDaCMinInvKgafdm is the Cmin amount of daily invertebrate biomass consumed
+  # at a population level (N of size-bin). Biomass units are Kg AFDM in Lees Ferry
+  # da-1.
+  
+  
+  all2$PopDaCMinInvKgafdm = (all2$PopDaCMinInvMJ  / KgwwtoMJ)  * wwtoafdm   # good
+  
+  #---------------------
+  # (MD added this one)
+  # Calculation converts Total MJ in Lees Ferry reach per day to Kg 
+  
+  # PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from
+  # invertebrates consumed at a population level (N of size-bin). Biomass units
+  # are Kg AFDM in Lees Ferry da-1.
+  
+  
+  all2$PopDadelGInvKgafdm = (all2$PopDadelGInvMJ  / KgwwtoMJ)  * wwtoafdm   # good
   
   #-----------------------------------------------------------------------------#
   
