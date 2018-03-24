@@ -1,25 +1,40 @@
 ###############################################################################
 #                                                                      Mar 2018
 #
-#   Population Level Bioenergetics Model of RBT @ Lees Ferry
+#          Population Level Bioenergetics Model of RBT @ Lees Ferry
 #
 #  Notes:
 #  * 
 #
 #  To do:
-#  * 
+#  * Add in plotting functions
 ###############################################################################
 
 
+source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
 
+#-----------------------------------------------------------------------------#
+# NO project. Recent time period: 2012 - 2016 
 
-run = calc_metabolism()
-
+run = calc_metabolism(project = "NO")
 
 dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
 
 
 
+
+
+
+#-----------------------------------------------------------------------------#
+# Lees Ferry long term monitoring data: 199X - 20XX 
+
+run = calc_metabolism(project = "monitoring")
+
+dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
+
+
+#-----------------------------------------------------------------------------#
+# Run model for a range of temperatures
 big.out = list()
 
 temps = c(4, 2, 0, -2, -4)
