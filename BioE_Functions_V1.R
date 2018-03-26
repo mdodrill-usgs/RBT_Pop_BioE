@@ -1,5 +1,5 @@
 ###############################################################################
-#                                                                      Feb 2018
+#                                                                      Mar 2018
 #
 #          Population Level Bioenergetics Model of RBT @ Lees Ferry
 #
@@ -19,18 +19,9 @@ data.dir = paste0(str.dir, "/Data_In")
 setwd(data.dir)
 
 #-----------------------------------------------------------------------------#
+###############################################################################
 # See Yards spreadsheet for validation the metabolizer
 # (Macro_TemperatureDependentMetabolism_2017_07_11_1132)
-
-# prop.s = 0.521527778
-# Temp = 12.96354167
-# # W = 86.47728289
-# W = 4.93487736941781
-# 
-# tot.s = 60*60*24
-# sec = prop.s * tot.s
-
-# metabolizer(sec, Temp, W)
 
 metabolizer = function(sec, Temp, W, with.plants = FALSE){
   
@@ -167,40 +158,23 @@ metabolizer = function(sec, Temp, W, with.plants = FALSE){
               pDi = pDi))
 }
 
-# 
-# prop.s = 0.521527778
-# Temp = 12.96354167
-# W = 86.47728289
-# 
-# out = metabolizer(prop.s, Temp, W)
 #-----------------------------------------------------------------------------#
-
 ###############################################################################
-#                                                                      Feb 2018
-#
-#          Population Level Bioenergetics Model of RBT @ Lees Ferry
-#
-#  Notes:
-#  * Made a function for the metabolic calc. and added this to BioE_Functions_V1
-#  * Need to change the directory for sourcing the 'BioE_Functions_V1.R', but
-#    this will find the correct directory for the data.
-#  * This script will do the per capita metabolic calcs. 
-#
-#  To do:
-#  * 
-#  
-###############################################################################
-# rm(list = ls(all = TRUE))
 
-calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE){
+calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE,
+                           avg.temp = FALSE){
   require(reshape2)
   require(dplyr)
   
   # load functions stored in R.script
-  source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
+  # source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
   
   if(project == "NO"){
-    day.in = read.table(file = "Input_File_Date_DL_T.csv", header = T, sep = ",")
+    if(avg.temp == TRUE){
+      day.in = read.table(file = "Input_10yr_Daily_Avg.csv", header = T, sep = ",")
+    } else {
+      day.in = read.table(file = "Input_File_Date_DL_T.csv", header = T, sep = ",")
+    }
     
     day.in$Date = as.Date(day.in$Date, format = "%m/%d/%Y")
     
@@ -229,6 +203,8 @@ calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE){
     
   } else {
     if(project == "monitoring"){
+      if(avg.temp == TRUE){message("Average temps were not used for the monitoring data")}
+      
       day.in = read.table(file = "Pgrow and CF for AGF LF 1991 to 2016 DD NOtoAGF.csv", header = T, sep = ",")
       day.in$Date = as.Date(day.in$Date, format = "%m/%d/%Y")
       
@@ -271,21 +247,8 @@ calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE){
 
 #-----------------------------------------------------------------------------#
 ###############################################################################
-#                                                                      Feb 2018
-#
-#   Population Level Bioenergetics Model of RBT @ Lees Ferry
-#
-#  Notes:
-#  * This script takes the basal metabolism (calculated in
-#    "1_Calc_Metabolism.R") and scales up to population level metrics using the
-#    abundance and growth data provided by Korman
-#  * Run "1_Calc_Metabolism.R" first, then this script
-#
-#  To do:
-#  * 
-###############################################################################
 
-pop_expand = function(base_mat, dat.in.all){
+pop_expand = function(base_mat, dat.in.all, write.output = NULL){
   
   if(attributes(dat.in.all)$project == "NO"){
     load("Interp.RData")
@@ -353,7 +316,9 @@ pop_expand = function(base_mat, dat.in.all){
   
   # PopDadelGMJ = IndDadelGgww * DaN * gtoKg * KgwwtoMJ
   
-  all2$PopDadelGMJ = all2$Growth * all2$N * .001 * KgwwtoMJ                            
+  all2$PopDadelGMJ = all2$Growth * all2$N * .001 * KgwwtoMJ     
+  
+  all2$PopDadelGKg = all2$Growth * all2$N * .001
   
   #---------------------
   # PopDadelGInvMJ is the amount of daily energy ascribed to growth derived from
@@ -364,7 +329,9 @@ pop_expand = function(base_mat, dat.in.all){
   # PopDadelGInvMJ = PopDadelGMJ * (pDi) / (Ai) 
   # Ai = 0.783      # Assimilation efficiency of invertebrates
   
-  all2$PopDadelGInvMJ = all2$PopDadelGMJ * all2$pDi / 0.783                            
+  all2$PopDadelGInvMJ = all2$PopDadelGMJ * all2$pDi / 0.783   
+  
+  all2$PopDadelGInvKg = all2$PopDadelGKg * all2$pDi / 0.783
   
   #---------------------
   # PopDadelGPlaMJ is the amount of daily energy ascribed to growth derived from
@@ -375,7 +342,9 @@ pop_expand = function(base_mat, dat.in.all){
   # PopDadelGPlaMJ = PopDadelGMJ * (pDp) / (Ap) 
   # Ap = 0.11       # assimilation efficiency of plants 
   
-  all2$PopDadelGPlaMJ = all2$PopDadelGMJ * (1 - all2$pDi) / 0.11                       
+  all2$PopDadelGPlaMJ = all2$PopDadelGMJ * (1 - all2$pDi) / 0.11       
+  
+  all2$PopDadelGPlaKg = all2$PopDadelGKg * (1 - all2$pDi) / 0.11
   
   #---------------------
   # PopDaCMinInv_MJ expands Cmin (energy consumed for maintenance levels based on
@@ -385,7 +354,9 @@ pop_expand = function(base_mat, dat.in.all){
   
   # PopDaCMinInvMJ = IndCMinInv * DaN * KJtoMJ
   
-  all2$PopDaCMinInvMJ = all2$Cmin.Inv * 0.001 * all2$N * 0.001                  
+  all2$PopDaCMinInvMJ = all2$Cmin.Inv * 0.001 * all2$N * 0.001      
+  
+  all2$PopDaCMinInvKg = all2$PopDaCMinInvMJ / KgwwtoMJ
   
   #---------------------
   # PopDaCMinPlaMJ expands Cmin (energy consumed for maintenance levels based on
@@ -395,7 +366,9 @@ pop_expand = function(base_mat, dat.in.all){
   
   # PopDaCMinPlaMJ = IndivCMinPlant * DaN * KJtoMJ
   
-  all2$PopDaCMinPlaMJ = all2$Cmin.Pla * 0.001 * all2$N * 0.001                  
+  all2$PopDaCMinPlaMJ = all2$Cmin.Pla * 0.001 * all2$N * 0.001      
+  
+  all2$PopDaCMinPlaKg = all2$PopDaCMinPlaMJ / KgwwtoMJ 
   
   #---------------------
   # PopDaCTotInvMJ  is the total amount of daily energy consumed at a population
@@ -406,6 +379,8 @@ pop_expand = function(base_mat, dat.in.all){
   
   all2$PopDaCTotInvMJ = all2$PopDaCMinInvMJ + all2$PopDadelGInvMJ
   
+  all2$PopDaCTotInvKg = all2$PopDaCMinInvKg + all2$PopDadelGInvKg
+  
   #---------------------
   # Calculation converts Total MJ in Lees Ferry reach per day to Kg 
   
@@ -415,7 +390,6 @@ pop_expand = function(base_mat, dat.in.all){
   
   # PopDaCTotInvKgafdm = PopDaCTotInvMJ  / (KgwwtoMJ  * wwtoafdw)              
   
-  # all2$PopDaCTotInvKgafdm = all2$PopDaCTotInvMJ  / (KgwwtoMJ  * wwtoafdm)  #bad
   all2$PopDaCTotInvKgafdm = (all2$PopDaCTotInvMJ  / KgwwtoMJ)  * wwtoafdm   # good
   
   #---------------------
@@ -423,10 +397,6 @@ pop_expand = function(base_mat, dat.in.all){
   
   # PopDaCTotInvgafdmm2 is the average amount of daily invertebrate biomass
   # consumed per m^2 . Biomass units are g AFDM m-2 da-1 in Lees Ferry
-  
-  # PopDaCTotInvgafdmm2 = PopDaCTotInvKgafdm / (GCLengthm * GCWidthm * Kgtog)    # bad
-  
-  # all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm / GCLengthm * GCWidthm) * 1000    # BAD !
   
   all2$PopDaCTotInvgafdmm2 = (all2$PopDaCTotInvKgafdm * 1000) / (GCLengthm * GCWidthm)  # GOOD
   #---------------------
@@ -453,13 +423,21 @@ pop_expand = function(base_mat, dat.in.all){
   
   #-----------------------------------------------------------------------------#
   
+  # write.table(all2, file = "RBT_BioE_Output_Values_03_26_18_Avg_temps.csv", sep = ",", row.names = F)
   # write.table(all2, file = "RBT_BioE_Output_Values_11_14_17_No_Plants.csv", sep = ",", row.names = F)
   # write.table(Bio, file = "RBT_BioE_Josh_Bio_11_15_17.csv", sep = ",", row.names = F)
   # write.table(Growth, file = "RBT_BioE_Josh_Growth_11_15_17.csv", sep = ",", row.names = F)
   # write.table(MidWgt, file = "RBT_BioE_Josh_Midwgt_11_15_17.csv", sep = ",", row.names = F)
   # write.table(N, file = "RBT_BioE_Josh_N_11_15_17.csv", sep = ",", row.names = F)
   
+  if(!is.null(write.output)){
+    data.out.dir = paste0(str.dir, "/Data_Out/")
+    today = format(Sys.time(), "%Y_%m_%d")
+    write.table(all2, file = paste0(data.out.dir, today, "_", write.output, ".csv"))
+  }
+  
   #-----------------------------------------------------------------------------#
   
   return(all2)
 }
+#################################################################################
