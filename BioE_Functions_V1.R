@@ -178,25 +178,40 @@ calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE,
     
     day.in$Date = as.Date(day.in$Date, format = "%m/%d/%Y")
     
-    w.in = read.table(file = "Input_File_Date_MidSz_Weight.csv", header = T, sep = ",")
+    #----------------------------------
+    # use the data that Josh sent in the workspace, not what Yard provided (commented out)
+    # w.in = read.table(file = "Input_File_Date_MidSz_Weight.csv", header = T, sep = ",")
+    # 
+    # # exclude blank cols that may get imported (probably a better way to do this?)
+    # w.in.2 = w.in[,which(!is.na(colSums(w.in)))]
+    # 
+    # # change the col names to the date (not the funky format which is imported)
+    # #----------> can't have dates as the column name, so go with character
+    # 
+    # names(w.in.2)[2:ncol(w.in.2)] = as.character(as.Date(substr(names(w.in.2)[2:ncol(w.in.2)], 2,
+    #                                                             nchar(names(w.in.2)[2:ncol(w.in.2)])),
+    #                                                      format = "%m.%d.%Y"))
+    # 
+    # # do some formatting to the fish mass data
+    # w.in.3 = melt(w.in.2, id.vars = c("MidSz"))
+    # names(w.in.3)[2:3] = c("Date", "fish.mass")
+    # 
+    # w.in.3$Date = as.Date(w.in.3$Date, format = "%Y-%m-%d")
+    #----------------------------------
+    load("Interp.RData")
     
-    # exclude blank cols that may get imported (probably a better way to do this?)
-    w.in.2 = w.in[,which(!is.na(colSums(w.in)))]
+    w.in = tbl_df(as.data.frame(MidWgt))
+    dates = seq.Date(from = as.Date("2012/4/1"), to = as.Date("2012/4/1") + Ndays - 1, by = "day")
     
-    # change the col names to the date (not the funky format which is imported)
-    #----------> can't have dates as the column name, so go with character
+    colnames(w.in) = as.character(dates)
+    w.in$MidSz = MidLen + 3    # Yard and Korman call the size bins different things 
     
-    names(w.in.2)[2:ncol(w.in.2)] = as.character(as.Date(substr(names(w.in.2)[2:ncol(w.in.2)], 2,
-                                                                nchar(names(w.in.2)[2:ncol(w.in.2)])),
-                                                         format = "%m.%d.%Y"))
+    w.in.2 = melt(w.in, id.vars = c("MidSz"))
+    names(w.in.2)[2:3] = c("Date", "fish.mass")
     
-    # do some formatting to the fish mass data
-    w.in.3 = melt(w.in.2, id.vars = c("MidSz"))
-    names(w.in.3)[2:3] = c("Date", "fish.mass")
+    w.in.2$Date = as.Date(w.in.2$Date, format = "%Y-%m-%d")
     
-    w.in.3$Date = as.Date(w.in.3$Date, format = "%Y-%m-%d")
-    
-    dat.in.all = left_join(w.in.3, day.in, by = c("Date")) 
+    dat.in.all = left_join(w.in.2, day.in, by = c("Date")) 
     
     # temperature adjustment
     dat.in.all$T = dat.in.all$T + temp.adj
