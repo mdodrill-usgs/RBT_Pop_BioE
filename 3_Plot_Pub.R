@@ -1,5 +1,5 @@
 ###############################################################################
-#                                                                      Feb 2018
+#                                                                      Mar 2018
 #
 #   Population Level Bioenergetics Model of RBT @ Lees Ferry
 #
@@ -15,9 +15,11 @@ library(ggthemes)
 library(gridExtra)
 library(gtable)
 library(grid)
+library(RColorBrewer)
 
 
 windows(xpos = 25, record = T, width = 9 * 2, height = 5 * 2)
+
 
 #-----------------------------------------------------------------------------#
 # add the size groups to the data
@@ -29,9 +31,9 @@ sz.key = data.frame(sz = c(1:6),
                     name = c("75-124", "125-174", "175-224",
                              "225-274", "275-324", ">325"))
 
-tmp = findInterval(all2$MidSz, sz.groups)
+tmp = findInterval(dat$MidSz, sz.groups)
 
-all2$sz.group = factor(sz.key[match(tmp, sz.key[,1]),2], ordered = T, levels = sz.key[,2])
+dat$sz.group = factor(sz.key[match(tmp, sz.key[,1]),2], ordered = T, levels = sz.key[,2])
 
 #-----------------------------------------------------------------------------#
 # Make a theme to use
@@ -52,23 +54,43 @@ yard_theme = theme(axis.title.x = element_text(size = 14, vjust = -.1),
                    legend.title.align = .5,
                    legend.key = element_rect(fill = "white"))
 
+#-----------------------------------------------------------------------------#
+
+# Keep working on the colors....
 
 
 
+# my.cols <- brewer.pal(5, "Blues")
+# my.cols
+# 
+# brewer.pal(4, "GnBu")  # the colors I used above....
+# #  "#F0F9E8" "#BAE4BC" "#7BCCC4" "#2B8CBE"
+# display.brewer.pal(4, "GnBu")
+# 
+# brewer.pal.info
+# 
+# display.brewer.all()
+# 
+# display.brewer.pal(11, "Spectral")
+# 
 
+# cols = brewer.pal(11, "RdYlBu")[c(2,4,5,6,9,10)]
+cols.1 = rev(brewer.pal(9, "YlOrRd")[c(3, 4, 5)])
 
+# cols.2 = brewer.pal(11, "RdYlBu")[c(2,4,5,6,9,10)]
+cols.2 = brewer.pal(11, "RdYlBu")[c(2,9,10)]
+
+cols = c(cols.2[1], cols.1[1:3], cols.2[2:3])
 
 #-----------------------------------------------------------------------------#
 # Fig 2 - Fig. 2. 2 -axis’s, Size stratified population estimate (50 mmm FL
 # bins) and biomass estimate pooled across size strata. X axis time (2012-2016)
 # (combination of bar histogram and line graph). (Color)
 
-
-
-N.all = group_by(all2, Date, sz.group) %>%
+N.all = group_by(dat, Date, sz.group) %>%
   summarize(N.tot = sum(N))
 
-all2$Pop.Mass.g = all2$N * all2$fish.mass
+dat$Pop.Mass.g = dat$N * dat$fish.mass
 
 
 p.1 = ggplot(N.all, aes(x = Date, y = N.tot/100000)) +
@@ -76,6 +98,8 @@ p.1 = ggplot(N.all, aes(x = Date, y = N.tot/100000)) +
            stat = "identity",
            # aes(color = rev(sz.group), fill = rev(sz.group))) +
            aes(color = sz.group, fill = sz.group)) +
+  scale_fill_manual(values = cols) +
+  scale_color_manual(values = cols) +
   labs(y = "Abundance (100,000's)", x = "", color = "Size Class", fill = "Size Class") +
   scale_x_date(date_breaks = "3 months", date_labels = "%b \n %Y") + #,
                # limits = as.Date(c('2012-01-01','2017-01-01'))) +
@@ -87,8 +111,14 @@ p1 = p.1 + theme(legend.position = c(.8,.8))
 p1
 
 #--------------------------------------
-mass.all = group_by(all2, Date) %>%
+mass.all = group_by(dat, Date) %>%
   summarise(mass.tot = sum(Pop.Mass.g))
+
+
+# !!! Make sure the biomass is correct & the second y-axis is correct !!!
+# !!! Make sure the biomass is correct & the second y-axis is correct !!!
+# !!! Make sure the biomass is correct & the second y-axis is correct !!!
+# !!! Make sure the biomass is correct & the second y-axis is correct !!!
 
 
 # p.2 = ggplot(mass.all, aes(x = Date, y = mass.tot/1000/1000)) +
@@ -125,11 +155,11 @@ ggplot_dual_axis_2(p1, p2)
 
 
 #--------------------------------------
-mass.all = group_by(all2, Date) %>%
+mass.all = group_by(dat, Date) %>%
   summarise(mass.tot = sum(Pop.Mass.g))
 
 
-p2 = ggplot(all2, aes(x = Date, y = Pop.Mass.g)) +
+p2 = ggplot(dat, aes(x = Date, y = Pop.Mass.g)) +
   geom_line(size = 1, aes(color = as.factor(MidSz))) + 
   labs(y = "Biomass") +
   facet_wrap(~sz.group, scales = "free") +
@@ -139,10 +169,6 @@ p2 = ggplot(all2, aes(x = Date, y = Pop.Mass.g)) +
 p2 = p2 + theme(axis.text.y = element_text(hjust = -1))
 
 p2
-#--------------------------------------
-
-
-
 
 #-----------------------------------------------------------------------------#
 # Fig 3 - Fig. 3. Panel (A & B), Line graphs (individual-daily not expanded to a
@@ -154,10 +180,10 @@ p2
 
 # dat$DadelGMJ = dat$Growth  * .001 * KgwwtoMJ 
 # 
-# # DadelGInvMJ = DadelGMJ * all2$pDi[1] / 0.783     
+# # DadelGInvMJ = DadelGMJ * dat$pDi[1] / 0.783     
 # 
 # 
-# dat$Cmin.MJ = dat$Cmin.kJ * .001  # convert kilo Joules to mega Joules
+dat$Cmin.MJ = dat$Cmin.kJ * .001  # convert kilo Joules to mega Joules
 # 
 # G.town = group_by(dat, Date, sz.group) %>%
 #   summarize(G.mean = mean(DadelGMJ),
@@ -188,6 +214,7 @@ p.3.a = ggplot(G.town, aes(x = Date, y = G.mean)) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
         labs(x = "", y = "Individual Mean Daily \n Growth Rates (g)",
              color = "Size Class") +
+        scale_color_manual(values = cols) +
         yard_theme +
         theme(legend.position = c(.5, 1),
               axis.text.x = element_blank(),
@@ -204,6 +231,7 @@ p.3.b = ggplot(G.town, aes(x = Date, y = Cmin.mean)) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
         labs(x = "", y = "Individual Mean Daily \n Minimum Consumption (MJ)",
              color = "Size Class") +
+       scale_color_manual(values = cols) +
         yard_theme +
         theme(legend.position = "none",
               plot.margin = unit(c(0,1,1,1), "lines"),
@@ -237,7 +265,7 @@ grid.arrange(G1, G2)
 # stratified by size (50 mmm FL bins). (Color)
 
 # Add temperature panel
-library(RColorBrewer)
+# library(RColorBrewer)
 
 pop.6.b = group_by(dat, Date, sz.group) %>%
   summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
@@ -272,6 +300,7 @@ f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
         labs(x = "", y = "Population Total Daily Consumption (MJ)",
              color = "Size Class") +
+        scale_color_manual(values = cols) +
         yard_theme +
         theme(legend.position = c(.5, 1),   
               plot.margin = unit(c(0,1,1,1), "lines"),
@@ -309,8 +338,32 @@ grid.arrange(G1.4, G2.4)
 
 
 #-----------------------------------------------------------------------------#
-#
+# RBT diet proportions by taxa
+# See: Yard_Diet_Mass_V3.R in C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\YARD
 
+diet = read.table(file = "C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/Data_In/FB_RBT_Diet_Mass_by_Taxa_Lees_V2.csv", header = T, sep = ",")
+
+diet$season = ifelse(diet$season == "spring", "Spring",
+                     ifelse(diet$season == "summer", "Summer",
+                            ifelse(diet$season == "fall", "Fall", "Winter")))
+
+diet$season.2 = factor(diet$season, levels = c('Spring', 'Summer', 'Fall', 'Winter'),
+                        ordered = TRUE)
+
+
+
+p = ggplot(diet, aes(y = prop, x = year)) +
+  geom_bar(aes(color = taxa, fill = taxa), stat = "identity", position = 'dodge') +
+  labs(y = "Proportion of Biomass", x = "", color = "", fill = "") +
+  facet_wrap(~ season.2, nrow = 1) +
+  yard_theme +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(size = 14, vjust = 1),
+        legend.position = c(.1,.9))
+
+p
+
+#-----------------------------------------------------------------------------#
 
 
 
