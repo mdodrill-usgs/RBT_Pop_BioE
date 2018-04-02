@@ -265,35 +265,50 @@ grid.arrange(G1, G2)
 # stratified by size (50 mmm FL bins). (Color)
 
 # Add temperature panel
-# library(RColorBrewer)
+# u.date = unique(dat$Date)
+# temps = dat[which(!duplicated(dat$Date)), c("Date", "T")]
 
-pop.6.b = group_by(dat, Date, sz.group) %>%
-  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+temps = data.frame(Date = dat$Date, obs.T = dat$T, avg.T = dat.2$T) %>%
+      filter(!duplicated(Date))
 
+# Color ramp of observed temps
+# f.4.a = ggplot(temps, aes(x = Date, y = obs.T)) +
+#         geom_line(size = 1, aes(color = obs.T)) +
+#         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+#         # scale_color_gradientn(colours = rev(brewer.pal(3, "Spectral"))) 
+#         # scale_color_gradient(low = "blue", high = "red")
+#         scale_colour_gradient2(low = "blue", mid = "yellow",
+#                                high = "red", midpoint = 11, space = "Lab") +
+#         labs(x = "", y = expression("Mean Daily Temperature "*~degree*C),
+#              color = "Size Class") +
+#         yard_theme +
+#         theme(legend.position = "none",    
+#               plot.margin = unit(c(0,1,1,1), "lines"),
+#               axis.line = element_line(color = 'black'),
+#               panel.border = element_blank(),
+#               panel.grid.major = element_line(colour = "gray90")) 
+# f.4.a
 
-u.date = unique(dat$Date)
+# observed and avg
+temps.2 = melt(temps, id.vars = "Date")
 
-temps = dat[which(!duplicated(dat$Date)), c("Date", "T")]
-
-
-f.4.a = ggplot(temps, aes(x = Date, y = T)) +
-        geom_line(size  = 1, aes(color = T)) +
+f.4.a = ggplot(temps.2, aes(x = Date, y = value)) +
+        geom_line(size = 1, aes(color = variable)) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
-        # scale_color_gradientn(colours = rev(brewer.pal(3, "Spectral"))) 
-        # scale_color_gradient(low = "blue", high = "red")
-        scale_colour_gradient2(low = "blue", mid = "yellow",
-                               high = "red", midpoint = 11, space = "Lab") +
         labs(x = "", y = expression("Mean Daily Temperature "*~degree*C),
              color = "Size Class") +
         yard_theme +
-        theme(legend.position = "none",    
+        theme(legend.position = "none",
               plot.margin = unit(c(0,1,1,1), "lines"),
               axis.line = element_line(color = 'black'),
               panel.border = element_blank(),
-              panel.grid.major = element_line(colour = "gray90")) 
+              panel.grid.major = element_line(colour = "gray90"))
 f.4.a
 
+
   
+pop.6.b = group_by(dat, Date, sz.group) %>%
+  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
 
 f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
         geom_line(aes(color = sz.group), size = 1) +
@@ -338,8 +353,103 @@ grid.arrange(G1.4, G2.4)
 
 
 #-----------------------------------------------------------------------------#
+# run the model with the observed and avg. temps (dat.1 & dat.2)
+
+s.1 = dat.1[,c("MidSz", "Date", "PopDaCTotInvKg")]
+s.1$Temp = "Observed"
+
+
+s.2 = dat.2[,c("MidSz", "Date", "PopDaCTotInvKg")]
+s.2$Temp = "Average"
+
+
+s.3 = rbind(s.1, s.2)
+
+
+pop.10 = group_by(s.3, Date, Temp) %>%
+         summarize(tot.PopDaCTotInvKg = sum(PopDaCTotInvKg))
+
+
+# pop.10 = group_by(dat, Date) %>%
+#   summarize(tot.PopDadelGKg = sum(PopDadelGKg),
+#             tot.PopDaCMinInvKg = sum(PopDaCMinInvKg),
+#             tot.PopDaCTotInvKg = sum(PopDaCTotInvKg))
+# 
+# pop.in = melt(pop.10, id.vars = "Date")
+
+
+f.4.b = ggplot(pop.10, aes(x = Date, y = tot.PopDaCTotInvKg)) +
+  geom_line(size = 1, aes(color = Temp)) +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+  labs(x = "", y = "Population Total C (Kg)",
+       color = "Temperature Regime") +
+  # scale_color_manual(values = cols) +
+  yard_theme #+
+  # theme(legend.position = c(.5, 1),   
+  #       plot.margin = unit(c(0,1,1,1), "lines"),
+  #       axis.line = element_line(color = 'black'),
+  #       panel.border = element_blank(),
+  #       panel.grid.major = element_line(colour = "gray90")) +
+  # guides(colour = guide_legend(nrow = 1, title.position = "left"))   
+f.4.b
+
+
+
+#-----------------------------------------------------------------------------#
+# run the model with the observed and avg. temps (dat.1 & dat.2)
+# see 'Working_Shade_Plot'
+
+avg = group_by(dat.2, Date) %>%
+  summarize(tot.PopDaCTotInvKg = sum(PopDaCTotInvKg),
+            tot.PopDaCMinInvKg = sum(PopDaCMinInvKg))
+
+pop.1 = group_by(dat.1, Date) %>%
+  summarize(tot.PopDaCTotInvKg = sum(PopDaCTotInvKg),
+            tot.PopDaCMinInvKg = sum(PopDaCMinInvKg))
+
+#--------------------------------------
+pop.1$min = ifelse(pop.1$tot.PopDaCTotInvKg <= pop.1$tot.PopDaCMinInvKg, pop.1$tot.PopDaCTotInvKg, pop.1$tot.PopDaCMinInvKg)
+pop.1$max = ifelse(pop.1$tot.PopDaCTotInvKg > pop.1$tot.PopDaCMinInvKg, pop.1$tot.PopDaCTotInvKg, pop.1$tot.PopDaCMinInvKg)
+
+pop.1$shade = ifelse(pop.1$tot.PopDaCTotInvKg < pop.1$tot.PopDaCMinInvKg, "up", "down")
+
+pop.1.b = pop.1
+pop.1.c = pop.1
+
+
+pop.1.b$min = ifelse(pop.1.b$shade == "up", NA, pop.1.b$min)
+pop.1.b$max = ifelse(pop.1.b$shade == "up", NA, pop.1.b$max)
+pop.1.b$shade = ifelse(pop.1.b$shade == "up", NA, pop.1.b$shade)
+pop.1.b$tot.PopDaCTotInvKg = ifelse(pop.1.b$shade == "up", NA, pop.1.b$tot.PopDaCTotInvKg)
+
+pop.1.c$min = ifelse(pop.1.c$shade == "down", NA, pop.1.c$min)
+pop.1.c$max = ifelse(pop.1.c$shade == "down", NA, pop.1.c$max)
+pop.1.c$shade = ifelse(pop.1.c$shade == "down", NA, pop.1.c$shade)
+pop.1.c$tot.PopDaCTotInvKg = ifelse(pop.1.c$shade == "down", NA, pop.1.c$tot.PopDaCTotInvKg)
+
+#--------------------------------------
+p = ggplot(pop.1.b, aes(x = Date)) +
+  geom_ribbon(aes(ymin = min, ymax = max), alpha = .5, fill = "gray90") +
+  geom_ribbon(data = pop.1.c, aes(ymin = min, ymax = max), alpha = .5, fill = "gray25") +
+  geom_line(data = pop.1.b, aes(y = tot.PopDaCTotInvKg), color = "gray50", alpha = .5, size = 1) +
+  geom_line(data = pop.1.c, aes(y = tot.PopDaCTotInvKg), color = "gray50", alpha = .5, size = 1) +
+  geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1, color = "black") +
+  # geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1.5, color = "red") +
+  geom_line(data = avg, aes(y = tot.PopDaCMinInvKg), color = "blue", size = 1.5) +
+  # geom_line(data = avg, aes(y = tot.PopDaCMinInvKg), size = 1) +
+  geom_line(data = avg, aes(y = tot.PopDaCTotInvKg), color = "orange") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+  labs(x = "", y = "add label here") + # / area of lees ferry 25000 * 123
+  yard_theme +
+  theme(legend.position = c(.8,.9))
+p
+
+
+#-----------------------------------------------------------------------------#
 # RBT diet proportions by taxa
 # See: Yard_Diet_Mass_V3.R in C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\YARD
+
+# this does not include the 'aggregate', change?!change?!change?!change?!change?!
 
 diet = read.table(file = "C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/Data_In/FB_RBT_Diet_Mass_by_Taxa_Lees_V2.csv", header = T, sep = ",")
 
