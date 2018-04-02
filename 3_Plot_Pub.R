@@ -295,11 +295,12 @@ temps.2 = melt(temps, id.vars = "Date")
 f.4.a = ggplot(temps.2, aes(x = Date, y = value)) +
         geom_line(size = 1, aes(color = variable)) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+        scale_color_manual(values = c("black", "gray")) +
         labs(x = "", y = expression("Mean Daily Temperature "*~degree*C),
-             color = "Size Class") +
+             color = "Temperature Regime") +
         yard_theme +
-        theme(legend.position = "none",
-              plot.margin = unit(c(0,1,1,1), "lines"),
+        theme(legend.position = c(.1,.9),
+              plot.margin = unit(c(1,1,1,1), "lines"),
               axis.line = element_line(color = 'black'),
               panel.border = element_blank(),
               panel.grid.major = element_line(colour = "gray90"))
@@ -308,17 +309,20 @@ f.4.a
 
   
 pop.6.b = group_by(dat, Date, sz.group) %>%
-  summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+  # summarize(tot.PopDaCTotInvMJ = sum(PopDaCTotInvMJ))
+  summarize(tot.PopDaCTotInvKg = sum(PopDaCTotInvKg))
 
-f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
+# f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvMJ)) +
+f.4.b = ggplot(pop.6.b, aes(x = Date, y = tot.PopDaCTotInvKg)) +
         geom_line(aes(color = sz.group), size = 1) +
         scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
-        labs(x = "", y = "Population Total Daily Consumption (MJ)",
+        # labs(x = "", y = "Population Total Daily Consumption (MJ)",
+        labs(x = "", y = "Population Total Daily Consumption (Kg)",
              color = "Size Class") +
         scale_color_manual(values = cols) +
         yard_theme +
         theme(legend.position = c(.5, 1),   
-              plot.margin = unit(c(0,1,1,1), "lines"),
+              plot.margin = unit(c(1,1,1,1), "lines"),
               axis.line = element_line(color = 'black'),
               panel.border = element_blank(),
               panel.grid.major = element_line(colour = "gray90")) +
@@ -444,6 +448,13 @@ p = ggplot(pop.1.b, aes(x = Date)) +
   theme(legend.position = c(.8,.9))
 p
 
+# G3.4 <- arrangeGrob(p,
+#                     top = textGrob("C", x = unit(.95, "npc"),
+#                                    y = unit(.95, "npc"),
+#                                    just = c("left", "top"),
+#                                    gp = gpar(col = "black", fontsize = 18)))
+# 
+# grid.arrange(G1.4, G2.4, G3.4)
 
 #-----------------------------------------------------------------------------#
 # RBT diet proportions by taxa

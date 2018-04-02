@@ -17,19 +17,24 @@ source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R"
 # NO project. Recent time period: 2012 - 2016 
 
 run = calc_metabolism(project = "NO")
-# run = calc_metabolism(project = "NO", avg.temp = TRUE)  # this will use a 10 yr avg. temperature regime
+run.2 = calc_metabolism(project = "NO", avg.temp = TRUE)  # this will use a 10 yr avg. temperature regime
 
 dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
+dat.2 = pop_expand(base_mat = run.2$base_mat, dat.in.all = run.2$dat.in.all)
+
+
 
 # will write an output file
-dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all, write.output = "Run_1")
+# dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all, write.output = "Run_1")
 
-
-
+# dat.1 = dat
+# dat.2 = dat
+# 
 #-----------------------------------------------------------------------------#
 # Lees Ferry long term monitoring data: 199X - 20XX 
 
-run = calc_metabolism(project = "monitoring", avg.temp = TRUE)
+# run = calc_metabolism(project = "monitoring", avg.temp = TRUE)  # avg.temp not used, see message
+run = calc_metabolism(project = "monitoring")
 
 dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
 
