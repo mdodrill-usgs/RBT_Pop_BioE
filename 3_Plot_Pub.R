@@ -437,11 +437,12 @@ p = ggplot(pop.1.b, aes(x = Date)) +
   geom_ribbon(data = pop.1.c, aes(ymin = min, ymax = max), alpha = .5, fill = "gray25") +
   geom_line(data = pop.1.b, aes(y = tot.PopDaCTotInvKg), color = "gray50", alpha = .5, size = 1) +
   geom_line(data = pop.1.c, aes(y = tot.PopDaCTotInvKg), color = "gray50", alpha = .5, size = 1) +
-  geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1, color = "black") +
+  # geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1, color = "black") +
+  geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1, color = "red") +
   # geom_line(data = pop.1, aes(y = tot.PopDaCMinInvKg), size = 1.5, color = "red") +
   geom_line(data = avg, aes(y = tot.PopDaCMinInvKg), color = "blue", size = 1.5) +
   # geom_line(data = avg, aes(y = tot.PopDaCMinInvKg), size = 1) +
-  geom_line(data = avg, aes(y = tot.PopDaCTotInvKg), color = "orange") +
+  # geom_line(data = avg, aes(y = tot.PopDaCTotInvKg), color = "orange") +
   scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
   labs(x = "", y = "add label here") + # / area of lees ferry 25000 * 123
   yard_theme +
@@ -457,10 +458,32 @@ p
 # grid.arrange(G1.4, G2.4, G3.4)
 
 #-----------------------------------------------------------------------------#
+GCLengthm = 25406.11 # meters
+GCWidthm = 123.83 # meters
+GCArea = GCLengthm * GCWidthm
+
+pop.a = group_by(dat.1, Date) %>%
+  summarize(tot.PopDaCTotInvKg = sum(PopDaCTotInvKg))
+
+pop.a$tot.PopDaCTotInvKgm2 = pop.a$tot.PopDaCTotInvKg / GCArea
+pop.a$tot.PopDaCTotInvgm2 = pop.a$tot.PopDaCTotInvKgm2 * 1000
+
+pp = ggplot(pop.a, aes(x = Date, y = tot.PopDaCTotInvgm2)) +
+     geom_line() +
+     scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
+     labs(x = "", y = "Total Consumption (grams / m2)") +
+     yard_theme
+
+pp
+
+
+#-----------------------------------------------------------------------------#
 # RBT diet proportions by taxa
 # See: Yard_Diet_Mass_V3.R in C:\Users\mdodrill\Desktop\FB_DOWN\Analysis\YARD
 
 # this does not include the 'aggregate', change?!change?!change?!change?!change?!
+
+# Need to ad some error bars...
 
 diet = read.table(file = "C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/Data_In/FB_RBT_Diet_Mass_by_Taxa_Lees_V2.csv", header = T, sep = ",")
 
