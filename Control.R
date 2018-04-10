@@ -23,13 +23,10 @@ dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
 dat.2 = pop_expand(base_mat = run.2$base_mat, dat.in.all = run.2$dat.in.all)
 
 
-
 # will write an output file
-# dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all, write.output = "Run_1")
+# dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all, write.output = "NO_Obs_Temps")
+# dat.2 = pop_expand(base_mat = run.2$base_mat, dat.in.all = run.2$dat.in.all, write.output = "NO_Avg_Temps")
 
-# dat.1 = dat
-# dat.2 = dat
-# 
 #-----------------------------------------------------------------------------#
 # Lees Ferry long term monitoring data: 199X - 20XX 
 
@@ -37,6 +34,7 @@ dat.2 = pop_expand(base_mat = run.2$base_mat, dat.in.all = run.2$dat.in.all)
 run = calc_metabolism(project = "monitoring")
 
 dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all)
+dat = pop_expand(base_mat = run$base_mat, dat.in.all = run$dat.in.all, write.output = "AZGFD")
 
 
 #-----------------------------------------------------------------------------#

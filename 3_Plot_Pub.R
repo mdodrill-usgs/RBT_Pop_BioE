@@ -18,7 +18,8 @@ library(grid)
 library(RColorBrewer)
 
 
-windows(xpos = 25, record = T, width = 9 * 2, height = 5 * 2)
+# windows(xpos = 25, record = T, width = 9 * 2, height = 5 * 2)
+windows(xpos = 25, record = T, width = 11, height = 8.5)
 
 
 #-----------------------------------------------------------------------------#
@@ -444,7 +445,7 @@ p = ggplot(pop.1.b, aes(x = Date)) +
   # geom_line(data = avg, aes(y = tot.PopDaCMinInvKg), size = 1) +
   # geom_line(data = avg, aes(y = tot.PopDaCTotInvKg), color = "orange") +
   scale_x_date(date_breaks = "3 month", date_labels = "%b \n %Y") +
-  labs(x = "", y = "add label here") + # / area of lees ferry 25000 * 123
+  labs(x = "", y = "Total Cmin (Kg Inv.) \n Total Consumption +- Growth") + # / area of lees ferry 25000 * 123
   yard_theme +
   theme(legend.position = c(.8,.9))
 p
@@ -483,7 +484,7 @@ pp
 
 # this does not include the 'aggregate', change?!change?!change?!change?!change?!
 
-# Need to ad some error bars...
+# Need to ad some error bars... see:Yard_Diet_Mass_V4.R (work in progress...)
 
 diet = read.table(file = "C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/Data_In/FB_RBT_Diet_Mass_by_Taxa_Lees_V2.csv", header = T, sep = ",")
 
