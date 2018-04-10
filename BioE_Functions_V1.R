@@ -53,23 +53,30 @@ metabolizer = function(sec, Temp, W, with.plants = FALSE){
   # Units are joules per day, J da-1 (actually Watts converted to J per sec (W =
   # J s-1 accounted for by seconds in a day.
   
-  # pDL = this is the day length in seconds (input file)
+  # sec = this is the day length in seconds (input file)
   # KW = Individual fish weight, units are Kg in wet weight; therefore divide W by 1000
   
   # Ra params
   
+  Ra = (1.17 * (KW * 0.001) ^ 0.44) * ((0.31 * (KW * 0.001) ^ 0.136) ^ 2.42) * sec
+  
+  #------------------------------                                                        # Remove block...
+  # (incorrect, use new equation, above)
+  # a3 = 0.25	      
+  # 
+  # b4 = 0.136 	        # velocity dependence coefficient 
+  # c1 = 2.42	          # velocity exponent (ms-1)
+  # 
+  # sec.day = 60 * 60 * 24  # seconds per day (sd-1)
+  
+  # Ra = ((a3 ^ c1 * (KW ^ b4) ^ c1) * pDL * sec.day) + (0.00 ^ c1 * ((KW) ^ b4) ^ c1 * ((1 - pDL) * (sec.day)))
+  
+  # (never use this in the model)
   # intercept for preferred swimming speed (Upref) Tudorache et al. 2011 20 cm/s
   # sustained swimming speed for a 200 g brook charr
-  a3 = 0.25	      
+  # Upref = (a3 ^ c1) * (KW ^ b4)	# preferred swimming speed, units = ms-1
+  #------------------------------
   
-  b4 = 0.136 	        # velocity dependence coefficient 
-  c1 = 2.42	          # velocity exponent (ms-1)
-  
-  sec.day = 60 * 60 * 24  # seconds per day (sd-1)
-  
-  Ra = ((a3 ^ c1 * (KW ^ b4) ^ c1) * pDL * sec.day) + (0.00 ^ c1 * ((KW) ^ b4) ^ c1 * ((1 - pDL) * (sec.day)))
-  
-  Upref = (a3 ^ c1) * (KW ^ b4)	# preferred swimming speed, units = ms-1
   
   #----------------------
   # Rd is the cost associated with digestion and protein synthesis (specific
@@ -448,7 +455,7 @@ pop_expand = function(base_mat, dat.in.all, write.output = NULL){
   if(!is.null(write.output)){
     data.out.dir = paste0(str.dir, "/Data_Out/")
     today = format(Sys.time(), "%Y_%m_%d")
-    write.table(all2, file = paste0(data.out.dir, today, "_", write.output, ".csv"))
+    write.table(all2, file = paste0(data.out.dir, "RBT_BioE_Output_", today, "_", write.output, ".csv"))
   }
   
   #-----------------------------------------------------------------------------#
