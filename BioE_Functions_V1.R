@@ -94,7 +94,7 @@ metabolizer = function(sec, Temp, W, with.plants = FALSE){
   b5 = 0.253	     # coefficient of plant diet proportion
   
   pSi = 0.252	     # this is the proportional cost of digestion for invertebrates 
-  pSp = 0.103 	     # this is the proportional cost of digestion for plants
+  pSp = 0.103 	   # this is the proportional cost of digestion for plants
   
   # pDp = a4 + b5 * log(W)
   
@@ -330,6 +330,16 @@ pop_expand = function(base_mat, dat.in.all, write.output = NULL){
   GCWidthm = 123.83 # meters
   
   #-----------------------------------------------------------------------------#
+  
+  # don't mess with growth here...
+  # tmp = all2$Growth * gwwtoJ
+  # 
+  # tmp2 = tmp * all2$pDi / 0.783
+  # 
+  # all2$Growth_adj = ifelse(all2$Cmin.Inv + tmp2 <0, 0, all2$Growth)
+
+  
+  #-----------------------------------------------------------------------------#
   # PopDadelGMJ is the amount of daily growth converted to units of energy (MJ)
   # consumed. This is scaled up from an individual to a population level (N of
   # size-bin), which is converted from wet-weight (g) Kg to units of energy MJ.
@@ -455,7 +465,8 @@ pop_expand = function(base_mat, dat.in.all, write.output = NULL){
   if(!is.null(write.output)){
     data.out.dir = paste0(str.dir, "/Data_Out/")
     today = format(Sys.time(), "%Y_%m_%d")
-    write.table(all2, file = paste0(data.out.dir, "RBT_BioE_Output_", today, "_", write.output, ".csv"))
+    write.table(all2, file = paste0(data.out.dir, "RBT_BioE_Output_", today, "_", write.output, ".csv"),
+                sep = ",", row.names = FALSE)
   }
   
   #-----------------------------------------------------------------------------#
