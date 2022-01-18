@@ -1,9 +1,13 @@
-# RBT_Pop_BioE
-
 :fish: :fish: :fish:
 Population Level Bioenergetics Model for Rainbow Trout 
 :fish: :fish: :fish:
 
+## Notes:
+
+Currently this work is submitted with the title:
+"You are what you eat: effects of ecosystem drivers on secondary production estimated from fish consumption and invertebrate drift.""
+
+See "run_model.R" which calls the functions in "calc_metabolism.R" to produce the bioenergetics calculations and results.
 
 ## Disclaimer
 
