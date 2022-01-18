@@ -168,6 +168,131 @@ metabolizer = function(sec, Temp, W, with.plants = FALSE){
 #-----------------------------------------------------------------------------#
 ###############################################################################
 
+# new (5/13/2021) version of the metabolism part
+
+metabolizer_2 = function(sec, Temp, W, del_G, with.plants = FALSE){
+  #----------------------
+  # Equation S1
+  # Rs is the energy expenditure for standard metabolism, units are joules per
+  # gram of fish 'wet weight 'per day (Reference Elliot 1976, Table 5, pg 933,
+  # based on minimum rations), 
+  
+  # (Note: called "Rs" in metabolizer function) 
+  
+  # Units are small calories per day, c da-1; therefore, value needs to be converted to joules
+  
+  # Rs params
+  a1 = 8.277       # basal metabolism constant
+  b1 = 0.731       # fish weight coef
+  b2 = 0.094       # temperature coef
+  K2 = 4.184       # converts small calories into MJ
+  
+  Rr = exp(log(a1) + (b1 * log(W)) + (b2 * Temp)) * K2
+  # equivelent way to write it (In Yard's doc "Dodrill Model Structure")
+  # Rr = a1 * (W^b1) * exp(b2 * Temp) * K2 
+  
+  #----------------------
+  # Equation S2
+  # Ra is the cost for swimming activity
+  
+  # Units are joules per day, J da-1 (actually Watts converted to J per sec (W =
+  # J s-1 accounted for by seconds in a day.
+  
+  # sec = this is the day length in seconds (input file)
+  tot.s = 60 * 60 * 24 # seconds in a day
+  
+  pDL = sec / tot.s # daylight proportion
+  # KW = Individual fish weight, units are Kg in wet weight; therefore divide W by 1000
+  
+  # Ra params
+  a2 = 1.17 # active metabolism intercept, Peters 1983, modified from Wate 1978
+  b3 = 0.44 # mass exponent
+  c = 2.42  # velocity coefficinet
+  a3 = 0.25 # preferred velocity intercept, Tudorache et al. 2011
+  b4 = 0.136 # Velocity coefficient 
+  
+  Vp = a3 * (W * 0.001)^b4 # velocity component
+  
+  Ra = a2 * (W * 0.001)^b3 * (Vp^c) * pDL
+  
+  #----------------------
+  # Equation S4
+  # Rd is the cost associated with digestion and protein synthesis (specific
+  # dynamic action, SDA)
+  
+  # Units are J da-1
+  
+  # pI, is the diet proportion consisting of invertebrates in trout diet based on
+  # fish size and its inverse (1 - pA for plants). This is an empirical
+  # relationship used to estimate the energetic contribution from algae
+  # (unpublished data, Yard, R2 = 0.87).
+  
+  # Rd params
+  a4 = 0.068   # Algae diet intercept
+  b5 = 0.00069 # Algae diet coefficient
+  
+  SI = .252  # Invertebrate SDA proportion, Peters 1983, modified from Ricklefs 1974
+  SA = .10   # Algae SDA proportion, Hanson et al. 1997 
+  
+  
+  pA = a4 + (b5 * W)
+  # pI = 1 - pA
+  
+  # This will turn off or on the plant proportion in the consumption estimate
+  if(with.plants == TRUE){
+    pI = 1 - pA 	 # this is the proportion of invertebrates in the diet based on weight (g)
+  } else {
+    pI = 1
+    pA = 0 
+  }
+  
+  Rd = pI * ((Rr + Ra) / (1 - SI)) + pA * ((Rr + Ra) / (1 - SA)) - (Rr + Ra) 
+  
+  #----------------------
+  # Equation S6
+  # E is the excretory cost per day (E; J da-1)
+  
+  # pE is the proportion of energy lost to total metabolism (Rt) from excretion
+  
+  pE = 0.078 # data from Xie et al. 1997
+  
+  Rt = Rr + Ra + Rd
+  
+  E = pE * Rt
+  
+  #----------------------
+  # equation 4, main text 
+  # ingestion
+  
+  # del_G is in grams --> convert to joules
+  # wwtoJ = 7000000000
+  
+  del_G_joules = del_G * (7*10^9)
+  
+  I = Rr + Ra + Rd + E + del_G_joules
+  
+  #----------------------
+  # equation 5, main text 
+  # consumption
+  
+  AI = 0.783 # invertebrate assimilation efficiency, Brocksen and Bugge 1974
+  AP = 0.11  # plant assimilation efficiency, Liebfried 1987
+  
+  
+  Con.J = I / (AI + ((pA / pI) * AP))
+  
+  Con.afdm = Con.J * (2.357*10^-5) # convert to afdm, Peters 1983; Ricciardi and Bourget 1988
+  
+  
+  return(list(I = I, Con.J = Con.J, Con.afdm = Con.afdm))
+}
+
+
+
+
+#-----------------------------------------------------------------------------#
+###############################################################################
+
 calc_metabolism = function(project = NULL, temp.adj = 0, with.plants = FALSE,
                            avg.temp = FALSE){
   require(reshape2)

@@ -19,7 +19,8 @@ library(reshape2)
 library(dplyr)
 
 # load functions stored in R.script
-source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
+# source("C:/Users/mdodrill/Desktop/RBT_BioE/Git/RBT_Pop_BioE/BioE_Functions_V1.R", chdir = F)
+source("./BioE_Functions_V1.R", chdir = F)
 
 day.in = read.table(file = "Input_File_Date_DL_T.csv", header = T, sep = ",")
 
